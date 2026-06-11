@@ -125,6 +125,37 @@ npx expo run:android --variant release
 
 ---
 
+## GitHub ✅
+
+- **Repositorio:** https://github.com/DCorreaO97/Mis-Finanzas.git
+- **Branch principal:** `main`
+- **GitHub Pages (preview web):** https://dcorreao97.github.io/Mis-Finanzas/
+  - El `preview/index.html` está copiado en `docs/index.html` para que GitHub Pages lo sirva
+- Git configurado con usuario `DCorreaO97`
+- `node_modules/`, `android/build/`, `android/app/build/`, `android/local.properties` excluidos por `.gitignore`
+
+### Comandos útiles
+```powershell
+# Subir cambios
+cd C:\Proyectos\FalabellaFinanzas
+git add .
+git commit -m "descripcion del cambio"
+git push
+```
+
+---
+
+## Base de datos — EN PROGRESO 🔄
+
+**Objetivo:** Agregar una base de datos al proyecto para reemplazar AsyncStorage.
+
+### Próximo paso al retomar:
+- Definir qué tecnología usar (Supabase, Firebase, SQLite, etc.)
+- Diseñar el esquema de tablas (transacciones, categorías, comercios)
+- Integrar con el AppContext existente
+
+---
+
 ## Features para el futuro
 - [ ] Importar movimientos históricos desde CSV
 - [ ] Gráficos de evolución mensual
@@ -136,5 +167,5 @@ npx expo run:android --variant release
 - La app usa **Expo bare workflow** (NO managed) — necesita compilación nativa
 - NO funciona con Expo Go por el módulo de notificaciones
 - API de categorización: Claude Haiku (`claude-haiku-4-5-20251001`)
-- Storage: AsyncStorage (todo local, sin backend)
+- Storage actual: AsyncStorage (todo local, sin backend) — **a reemplazar con DB**
 - Al primer arranque carga 3 meses de datos de muestra
