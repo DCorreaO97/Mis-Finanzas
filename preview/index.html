@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Falabella Finanzas — Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  body { background: #0a0a0a; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 16px; gap: 32px; flex-wrap: wrap; }
+
+  /* Phone shell */
+  .phone {
+    width: 375px; height: 780px; background: #111; border-radius: 44px;
+    border: 2px solid #2a2a2a; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px #1a1a1a, inset 0 1px 0 #333;
+    position: relative; flex-shrink: 0;
+  }
+
+  .notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 30px; background: #111; border-radius: 0 0 20px 20px; z-index: 99;
+  }
+
+  .status-bar {
+    height: 44px; background: #111; display: flex; align-items: flex-end;
+    justify-content: space-between; padding: 0 24px 6px; color: #fff; font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .status-right { display: flex; gap: 6px; align-items: center; }
+  .battery { width: 22px; height: 12px; border: 1.5px solid #fff; border-radius: 3px; position: relative; padding: 2px; }
+  .battery::after { content:''; position: absolute; right: -4px; top: 3px; width: 3px; height: 6px; background: #fff; border-radius: 0 2px 2px 0; }
+  .battery-fill { width: 80%; height: 100%; background: #4CAF50; border-radius: 1px; }
+
+  /* Screen content */
+  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .tab-content { flex: 1; overflow-y: auto; padding: 0 16px 12px; scrollbar-width: none; }
+  .tab-content::-webkit-scrollbar { display: none; }
+
+  /* Bottom tab bar */
+  .tab-bar {
+    height: 76px; background: #1a1a1a; border-top: 1px solid #2a2a2a;
+    display: flex; align-items: center; justify-content: space-around; padding: 0 4px 10px;
+    flex-shrink: 0;
+  }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 10px; border-radius: 12px; transition: background 0.15s; min-width: 52px; }
+  .tab-item:hover { background: #ffffff08; }
+  .tab-item.active .tab-label { color: #4CAF50; }
+  .tab-icon { font-size: 22px; line-height: 1; }
+  .tab-label { font-size: 10px; color: #555; font-weight: 500; }
+  .tab-item.active .tab-label { color: #4CAF50; }
+
+  .add-btn {
+    width: 52px; height: 52px; border-radius: 26px; background: #2E7D32;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    font-size: 26px; color: #fff; line-height: 1; margin-bottom: 6px;
+    box-shadow: 0 4px 16px rgba(76,175,80,0.4); border: none; transition: transform 0.1s;
+    position: relative;
+  }
+  .add-btn:hover { transform: scale(1.06); }
+
+  .badge {
+    position: absolute; top: -4px; right: -4px; background: #FF8F00;
+    color: #fff; font-size: 10px; font-weight: 700; border-radius: 10px;
+    padding: 1px 5px; min-width: 16px; text-align: center;
+  }
+
+  /* Screen title */
+  .screen-title { color: #fff; font-size: 26px; font-weight: 800; margin-top: 16px; }
+  .screen-sub { color: #555; font-size: 13px; margin-top: 2px; margin-bottom: 16px; }
+
+  /* ── RESUMEN ────────────────────────── */
+  .main-card {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%);
+    border-radius: 20px; padding: 20px; border: 1px solid #4CAF5044; margin-bottom: 18px;
+  }
+  .main-card-title { color: #81C784; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .main-balance { font-size: 36px; font-weight: 800; color: #fff; margin-bottom: 16px; }
+  .sub-cards { display: flex; gap: 10px; margin-bottom: 14px; }
+  .sub-card { flex: 1; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
+  .sub-card-label { color: rgba(255,255,255,0.6); font-size: 11px; margin-bottom: 4px; }
+  .sub-card-amount { font-size: 14px; font-weight: 700; color: #fff; }
+  .sub-card-amount.expense { color: #EF9A9A; }
+
+  .savings-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .savings-label { color: rgba(255,255,255,0.5); font-size: 12px; }
+  .savings-pct { color: #A5D6A7; font-size: 13px; font-weight: 700; }
+  .savings-bar { height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; }
+  .savings-fill { height: 6px; background: #81C784; border-radius: 3px; transition: width 0.6s ease; }
+
+  .pending-alert { margin-top: 12px; background: rgba(255,143,0,0.15); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,143,0,0.3); color: #FFB74D; font-size: 12px; font-weight: 600; }
+
+  .section-title { color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+
+  .cat-row { background: #1E1E1E; border-radius: 12px; padding: 12px; margin-bottom: 8px; border: 1px solid #2A2A2A; }
+  .cat-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .cat-left { display: flex; align-items: center; gap: 10px; }
+  .cat-icon-sm { font-size: 20px; }
+  .cat-name { color: #fff; font-size: 13px; font-weight: 600; }
+  .cat-count { color: #555; font-size: 11px; margin-top: 1px; }
+  .cat-amount { color: #fff; font-size: 13px; font-weight: 700; }
+  .cat-pct { color: #666; font-size: 11px; text-align: right; }
+  .cat-bar-bg { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+  .cat-bar-fill { height: 4px; border-radius: 2px; transition: width 0.8s ease; }
+
+  /* ── TX ITEM ────────────────────────── */
+  .tx-item { background: #1E1E1E; border-radius: 14px; padding: 14px; border: 1px solid #2A2A2A; margin-bottom: 9px; cursor: pointer; transition: border-color 0.15s; }
+  .tx-item:hover { border-color: #3a3a3a; }
+  .tx-item.income { border-color: #4CAF5022; }
+  .tx-item.pending-tx { border-color: #FF8F0033; }
+  .tx-row { display: flex; align-items: center; gap: 12px; }
+  .tx-icon-wrap { width: 46px; height: 46px; border-radius: 12px; border: 1.5px solid; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .tx-info { flex: 1; }
+  .tx-merchant { color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-meta { color: #555; font-size: 10px; margin-top: 3px; }
+  .tx-amount-wrap { text-align: right; }
+  .tx-amount { font-size: 14px; font-weight: 700; }
+  .tx-amount.out { color: #fff; }
+  .tx-amount.in { color: #4CAF50; }
+  .tx-badge { font-size: 10px; margin-top: 2px; }
+  .tx-badge.pending { color: #FF8F00; font-weight: 600; }
+  .tx-badge.ok { color: #4CAF50; }
+
+  /* Expanded */
+  .tx-expanded { margin-top: 12px; padding-top: 12px; border-top: 1px solid #252525; }
+  .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .cat-chip { padding: 7px 10px; border-radius: 18px; border: 1.5px solid; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: opacity 0.15s; font-size: 11px; font-weight: 500; color: #ccc; }
+  .cat-chip:hover { opacity: 0.8; }
+  .cat-label-sm { color: #666; font-size: 11px; margin-bottom: 4px; }
+
+  .split-card { background: #558B2F18; border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid #558B2F33; }
+  .split-title { color: #81C784; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .split-detail { color: #aaa; font-size: 11px; margin-bottom: 2px; }
+  .split-recovered { color: #66BB6A; font-size: 11px; margin-top: 2px; }
+
+  /* ── HISTORIAL ──────────────────────── */
+  .month-card { background: #1E1E1E; border-radius: 16px; margin-bottom: 12px; border: 1px solid #2A2A2A; overflow: hidden; }
+  .month-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; cursor: pointer; }
+  .month-label { color: #fff; font-size: 16px; font-weight: 700; }
+  .month-meta { color: #555; font-size: 11px; margin-top: 3px; }
+  .month-balance { font-size: 16px; font-weight: 700; }
+  .month-chevron { color: #555; font-size: 11px; margin-top: 4px; text-align: right; }
+  .month-body { border-top: 1px solid #2A2A2A; padding: 16px; }
+  .summary-row { display: flex; background: #252525; border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+  .summary-item { flex: 1; text-align: center; }
+  .summary-label { color: #666; font-size: 10px; margin-bottom: 4px; }
+  .summary-val { font-size: 13px; font-weight: 700; }
+  .summary-divider { width: 1px; background: #333; margin: 4px 0; }
+
+  /* ── MODAL ──────────────────────────── */
+  .modal-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: flex-end; z-index: 50;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  .modal-sheet {
+    background: #1A1A1A; border-radius: 24px 24px 0 0;
+    width: 100%; padding: 0 20px 32px; max-height: 88%;
+    overflow-y: auto; scrollbar-width: none;
+    animation: slideUp 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  .modal-sheet::-webkit-scrollbar { display: none; }
+  @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 14px; border-bottom: 1px solid #2A2A2A; margin-bottom: 8px; }
+  .modal-title { color: #fff; font-size: 17px; font-weight: 700; }
+  .modal-close { color: #666; font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .modal-close:hover { color: #999; }
+
+  .dir-btns { display: flex; flex-direction: column; gap: 14px; padding: 16px 0; }
+  .dir-btn { background: #1E1E1E; border-radius: 16px; padding: 22px; text-align: center; cursor: pointer; border: 1.5px solid #2E7D32; transition: transform 0.1s, background 0.15s; }
+  .dir-btn:hover { background: #252525; transform: scale(0.98); }
+  .dir-btn.income-btn { border-color: #388E3C; }
+  .dir-btn-icon { font-size: 36px; margin-bottom: 8px; }
+  .dir-btn-label { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .dir-btn-sub { color: #666; font-size: 12px; }
+
+  .field-label { color: #888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 6px; }
+  .field-input { background: #252525; border-radius: 10px; padding: 13px; color: #fff; font-size: 14px; border: 1px solid #2A2A2A; width: 100%; outline: none; }
+  .field-input::placeholder { color: #444; }
+  .field-input:focus { border-color: #4CAF5055; }
+  .amount-preview { color: #4CAF50; font-size: 13px; font-weight: 600; margin-top: 4px; }
+
+  .add-submit { background: #2E7D32; border-radius: 14px; padding: 15px; text-align: center; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; border: none; width: 100%; }
+  .add-submit:hover { opacity: 0.85; }
+
+  .split-toggle { margin-top: 14px; padding: 12px; border-radius: 10px; border: 1.5px solid #558B2F55; background: #558B2F18; text-align: center; color: #81C784; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .split-toggle.active { border-color: #558B2F; background: #558B2F28; }
+
+  .income-type-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .income-type-btn { flex: 1; min-width: 45%; padding: 12px; border-radius: 12px; background: #252525; border: 1.5px solid #2A2A2A; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+  .income-type-btn.active { border-color: #4CAF50; background: #4CAF5020; }
+  .income-type-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .income-type-label { color: #888; font-size: 11px; font-weight: 600; }
+  .income-type-btn.active .income-type-label { color: #81C784; }
+
+  /* ── AJUSTES ────────────────────────── */
+  .settings-section { background: #1E1E1E; border-radius: 16px; padding: 16px; margin-bottom: 14px; border: 1px solid #2A2A2A; }
+  .settings-title { color: #fff; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .settings-desc { color: #666; font-size: 12px; margin-bottom: 12px; line-height: 1.5; }
+  .key-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .key-input { flex: 1; background: #252525; border-radius: 10px; padding: 13px; color: #fff; font-size: 13px; border: 1px solid #2A2A2A; outline: none; }
+  .show-btn { background: #252525; border-radius: 10px; padding: 0 14px; color: #888; font-size: 12px; font-weight: 600; border: 1px solid #2A2A2A; cursor: pointer; white-space: nowrap; }
+  .perm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .perm-dot { width: 10px; height: 10px; border-radius: 5px; background: #EF5350; }
+  .perm-dot.green { background: #4CAF50; }
+  .perm-text { color: #ccc; font-size: 13px; }
+  .settings-btn { border-radius: 12px; padding: 13px; text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 8px; border: none; width: 100%; }
+  .settings-btn.primary { background: #2E7D32; color: #fff; }
+  .settings-btn.secondary { background: #252525; color: #ccc; border: 1px solid #4CAF5044; }
+  .settings-btn.danger { background: #7f1d1d; color: #fff; }
+  .memory-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #2A2A2A; }
+  .memory-merchant { color: #fff; font-size: 13px; }
+  .memory-cat { color: #666; font-size: 11px; }
+  .memory-del { color: #555; cursor: pointer; padding: 4px 8px; font-size: 14px; margin-left: auto; }
+  .settings-link { color: #81C784; font-size: 12px; text-align: center; display: block; margin-top: 4px; }
+
+  /* Toasts / notification demo */
+  .notif-toast {
+    position: absolute; top: 60px; left: 12px; right: 12px;
+    background: #252525; border-radius: 14px; padding: 12px 14px;
+    border: 1px solid #4CAF5033; z-index: 100;
+    display: flex; gap: 10px; align-items: center;
+    animation: slideDown 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+  }
+  @keyframes slideDown { from { transform: translateY(-20px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+  @keyframes fadeOut { from { opacity:1 } to { opacity:0 } }
+  .notif-icon { font-size: 20px; }
+  .notif-title { color: #fff; font-size: 12px; font-weight: 700; }
+  .notif-body { color: #888; font-size: 11px; }
+
+  /* Sidebar legend */
+  .legend { color: #ccc; max-width: 280px; }
+  .legend h2 { color: #4CAF50; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .legend p { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 20px; }
+  .legend-tab { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; background: #1a1a1a; border-radius: 12px; padding: 12px; border: 1px solid #2a2a2a; }
+  .legend-tab-icon { font-size: 22px; flex-shrink: 0; }
+  .legend-tab-title { color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .legend-tab-desc { color: #666; font-size: 12px; line-height: 1.5; }
+  .legend-flow { background: #1a1a1a; border-radius: 12px; padding: 14px; border: 1px solid #2a2a2a; margin-bottom: 14px; }
+  .legend-flow-title { color: #4CAF50; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .flow-step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .flow-num { width: 20px; height: 20px; border-radius: 10px; background: #2E7D32; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .flow-text { color: #888; font-size: 12px; line-height: 1.5; }
+  .flow-text strong { color: #ccc; }
+
+  /* Section header in list */
+  .section-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 4px; }
+  .section-header-text { color: #aaa; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-header-count { color: #555; font-size: 11px; }
+
+  /* Empty state */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; gap: 8px; }
+  .empty-icon { font-size: 52px; }
+  .empty-title { color: #fff; font-size: 18px; font-weight: 800; }
+  .empty-sub { color: #888; font-size: 13px; text-align: center; }
+
+  /* Filter chips */
+  .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; scrollbar-width: none; }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .filter-chip { padding: 7px 12px; border-radius: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; color: #888; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+  .filter-chip.active { border-color: #4CAF50; background: #4CAF5020; color: #A5D6A7; font-weight: 700; }
+
+  /* Pendientes banner */
+  .pending-banner { display: flex; align-items: center; gap: 12px; background: #FF8F0018; border-radius: 14px; padding: 14px; border: 1px solid #FF8F0040; margin-bottom: 16px; }
+  .pending-banner-icon { font-size: 28px; }
+  .pending-banner-title { color: #FFB74D; font-size: 14px; font-weight: 700; }
+  .pending-banner-sub { color: #888; font-size: 12px; margin-top: 2px; }
+
+  .tab-switch { display: flex; gap: 4px; flex-wrap: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ PHONE 1 — RESUMEN ══════════════════ -->
+<div class="phone" id="phone1">
+  <div class="notch"></div>
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-right">
+      <span>📶</span>
+      <div class="battery"><div class="battery-fill"></div></div>
+    </div>
+  </div>
+  <div class="screen">
+    <div class="tab-content" id="content1">
+      <!-- Resumen por defecto -->
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="switchTab(1,'resumen')">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">Resumen</span>
+      </div>
+      <div class="tab-item" onclick="switchTab(1,'historial')">
+        <span class="tab-icon">📅</span>
+        <span class="tab-label">Historial</span>
+      </div>
+      <button class="add-btn" onclick="openModal(1)" style="position:relative">
+        +
+      </button>
+      <div class="tab-item" onclick="switchTab(1,'movimientos')">
+        <span class="tab-icon">💳</span>
+        <span class="tab-label">Movimientos</span>
+      </div>
+      <div class="tab-item" onclick="switchTab(1,'pendientes')" style="position:relative">
+        <span class="tab-icon">⚠️</span>
+        <span class="tab-label">Pendientes</span>
+        <span class="badge" style="position:absolute;top:4px;right:6px">1</span>
+      </div>
+      <div class="tab-item" onclick="switchTab(1,'ajustes')">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-label">Ajustes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PHONE 2 — MOVIMIENTOS ══════════════════ -->
+<div class="phone" id="phone2">
+  <div class="notch"></div>
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-right">
+      <span>📶</span>
+      <div class="battery"><div class="battery-fill"></div></div>
+    </div>
+  </div>
+  <div class="screen">
+    <div class="tab-content" id="content2">
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item" onclick="switchTab(2,'resumen')"><span class="tab-icon">📊</span><span class="tab-label">Resumen</span></div>
+      <div class="tab-item" onclick="switchTab(2,'historial')"><span class="tab-icon">📅</span><span class="tab-label">Historial</span></div>
+      <button class="add-btn" onclick="openModal(2)">+</button>
+      <div class="tab-item active" onclick="switchTab(2,'movimientos')"><span class="tab-icon">💳</span><span class="tab-label">Movimientos</span></div>
+      <div class="tab-item" onclick="switchTab(2,'pendientes')" style="position:relative">
+        <span class="tab-icon">⚠️</span><span class="tab-label">Pendientes</span>
+        <span class="badge" style="position:absolute;top:4px;right:6px">1</span>
+      </div>
+      <div class="tab-item" onclick="switchTab(2,'ajustes')"><span class="tab-icon">⚙️</span><span class="tab-label">Ajustes</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ LEGEND ══════════════════ -->
+<div class="legend">
+  <h2>Falabella Finanzas</h2>
+  <p>Demo interactivo — toca las pestañas, el botón <strong style="color:#4CAF50">+</strong>, y los ítems de la lista para explorar.</p>
+
+  <div class="legend-flow">
+    <div class="legend-flow-title">🤖 Flujo automático Android</div>
+    <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Llega notificación push del <strong>Banco Falabella</strong></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">El servicio nativo la <strong>intercepta en background</strong></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Parsea</strong> comercio, monto y tipo</div></div>
+    <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>Claude AI</strong> la categoriza automáticamente</div></div>
+    <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Aparece en la app con <strong>notificación de confirmación</strong></div></div>
+  </div>
+
+  <div class="legend-tab"><div class="legend-tab-icon">📊</div><div><div class="legend-tab-title">Resumen</div><div class="legend-tab-desc">Balance del mes, tasa de ahorro, barras por categoría ordenadas de mayor a menor gasto.</div></div></div>
+  <div class="legend-tab"><div class="legend-tab-icon">📅</div><div><div class="legend-tab-title">Historial</div><div class="legend-tab-desc">Meses expandibles con ingresos, gastos y desglose por categoría.</div></div></div>
+  <div class="legend-tab"><div class="legend-tab-icon">💳</div><div><div class="legend-tab-title">Movimientos</div><div class="legend-tab-desc">Lista filtrable por dirección y categoría. Toca un ítem para ver detalle o categorizar.</div></div></div>
+  <div class="legend-tab"><div class="legend-tab-icon">⚠️</div><div><div class="legend-tab-title">Pendientes</div><div class="legend-tab-desc">Solo gastos sin categorizar, expandidos por defecto para categorizar rápido.</div></div></div>
+  <div class="legend-tab"><div class="legend-tab-icon">⚙️</div><div><div class="legend-tab-title">Ajustes</div><div class="legend-tab-desc">API Key, estado de permisos Android, memoria de comercios recordados.</div></div></div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────
+const CATS = [
+  {id:'supermercado', icon:'🛒', label:'Supermercado', color:'#66BB6A'},
+  {id:'transporte',   icon:'🚌', label:'Transporte',   color:'#1B5E20'},
+  {id:'restaurantes', icon:'🍽️', label:'Restaurantes', color:'#4CAF50'},
+  {id:'deporte',      icon:'⚽', label:'Deporte',      color:'#81C784'},
+  {id:'salud',        icon:'💊', label:'Salud',        color:'#33691E'},
+  {id:'carrete',      icon:'🎉', label:'Carrete',      color:'#558B2F'},
+  {id:'ropa',         icon:'👕', label:'Ropa',         color:'#43A047'},
+  {id:'departamento', icon:'🏠', label:'Departamento', color:'#388E3C'},
+  {id:'inversiones',  icon:'📈', label:'Inversiones',  color:'#2E7D32'},
+];
+
+const TXS = [
+  {id:'1', merchant:'Empresa S.A.',       amount:1200000, type:'sueldo',   dir:'in',  cat:'sueldo',       src:'income',  split:null,  daysAgo:0},
+  {id:'2', merchant:'Carlos Ramos',       amount:16000,  type:'devolucion',dir:'in',  cat:'devolucion',   src:'income',  split:null,  daysAgo:1},
+  {id:'3', merchant:'Jumbo Las Condes',   amount:87500,  type:'compra',    dir:'out', cat:'supermercado', src:'local',   split:null,  daysAgo:2},
+  {id:'4', merchant:'Uber',               amount:4200,   type:'compra',    dir:'out', cat:'transporte',   src:'local',   split:null,  daysAgo:2},
+  {id:'5', merchant:'Starbucks',          amount:6800,   type:'compra',    dir:'out', cat:'restaurantes', src:'local',   split:null,  daysAgo:3},
+  {id:'6', merchant:'SmartFit',           amount:29900,  type:'compra',    dir:'out', cat:'deporte',      src:'memory',  split:null,  daysAgo:4},
+  {id:'7', merchant:'Jumbo (Asado)',      amount:64000,  type:'compra',    dir:'out', cat:'supermercado', src:'local',   split:{people:4,share:16000,rec:16000,desc:'Asado cumpleaños'}, daysAgo:5},
+  {id:'8', merchant:'Cruz Verde',         amount:14300,  type:'compra',    dir:'out', cat:'salud',        src:'ai',      split:null,  daysAgo:6},
+  {id:'9', merchant:'Comercio Descono.',  amount:22000,  type:'compra',    dir:'out', cat:null,           src:null,      split:null,  daysAgo:6},
+];
+
+function formatCLP(n) {
+  return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
+}
+function timeAgo(days) {
+  if(days===0) return 'hoy';
+  if(days===1) return 'ayer';
+  return `hace ${days} días`;
+}
+function getCat(id) { return CATS.find(c=>c.id===id)||null; }
+
+// ── SCREENS ──────────────────────────────────────────────────────
+function renderResumen() {
+  const income   = 1200000 + 16000;
+  const expenses = 87500 + 4200 + 6800 + 29900 + 16000 + 14300;
+  const balance  = income - expenses;
+  const rate     = Math.round((balance/income)*100);
+
+  const catTotals = [
+    {id:'supermercado', icon:'🛒', label:'Supermercado', color:'#66BB6A', total:87500+16000, count:2},
+    {id:'deporte',      icon:'⚽', label:'Deporte',      color:'#81C784', total:29900, count:1},
+    {id:'salud',        icon:'💊', label:'Salud',        color:'#33691E', total:14300, count:1},
+    {id:'restaurantes', icon:'🍽️', label:'Restaurantes', color:'#4CAF50', total:6800,  count:1},
+    {id:'transporte',   icon:'🚌', label:'Transporte',   color:'#1B5E20', total:4200,  count:1},
+  ];
+
+  return `
+    <div class="screen-title">Resumen</div>
+    <div class="screen-sub">Junio 2026</div>
+    <div class="main-card">
+      <div class="main-card-title">Balance del mes</div>
+      <div class="main-balance">${formatCLP(balance)}</div>
+      <div class="sub-cards">
+        <div class="sub-card">
+          <div class="sub-card-label">📥 Ingresos</div>
+          <div class="sub-card-amount">${formatCLP(income)}</div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-card-label">💸 Gastos</div>
+          <div class="sub-card-amount expense">${formatCLP(expenses)}</div>
+        </div>
+      </div>
+      <div class="savings-row">
+        <span class="savings-label">Tasa de ahorro</span>
+        <span class="savings-pct">${rate}%</span>
+      </div>
+      <div class="savings-bar"><div class="savings-fill" style="width:${rate}%"></div></div>
+      <div class="pending-alert">⚠️ 1 gasto sin categorizar</div>
+    </div>
+
+    <div class="section-title">Gastos por categoría</div>
+    ${catTotals.map(c => {
+      const pct = Math.round((c.total/income)*100);
+      return `
+      <div class="cat-row">
+        <div class="cat-row-top">
+          <div class="cat-left">
+            <span class="cat-icon-sm">${c.icon}</span>
+            <div>
+              <div class="cat-name">${c.label}</div>
+              <div class="cat-count">${c.count} movimiento${c.count!==1?'s':''}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="cat-amount">${formatCLP(c.total)}</div>
+            <div class="cat-pct">${pct}% del sueldo</div>
+          </div>
+        </div>
+        <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${Math.min(pct*2,100)}%;background:${c.color}"></div></div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function renderHistorial() {
+  const months = [
+    {label:'Junio 2026',  income:1216000, expenses:158700, rate:87, txCount:9,  pending:1, open:true},
+    {label:'Mayo 2026',   income:1225000, expenses:187400, rate:85, txCount:8,  pending:0, open:false},
+    {label:'Abril 2026',  income:1200000, expenses:201000, rate:83, txCount:11, pending:0, open:false},
+  ];
+  return `
+    <div class="screen-title">Historial</div>
+    <div class="screen-sub">3 meses registrados</div>
+    ${months.map((m,i) => `
+    <div class="month-card">
+      <div class="month-header" onclick="toggleMonth(${i})">
+        <div>
+          <div class="month-label">${m.label}</div>
+          <div class="month-meta">${m.txCount} movimientos · ${m.pending>0?`⚠️ ${m.pending} pendiente`:'✓ Todo categorizado'}</div>
+        </div>
+        <div>
+          <div class="month-balance" style="color:${m.income-m.expenses>0?'#4CAF50':'#EF5350'}">${formatCLP(m.income-m.expenses)}</div>
+          <div class="month-chevron" id="chev${i}">${m.open?'▲':'▼'}</div>
+        </div>
+      </div>
+      <div id="mbody${i}" style="display:${m.open?'block':'none'}">
+        <div class="month-body">
+          <div class="summary-row">
+            <div class="summary-item"><div class="summary-label">📥 Ingresos</div><div class="summary-val" style="color:#A5D6A7">${formatCLP(m.income)}</div></div>
+            <div class="summary-divider"></div>
+            <div class="summary-item"><div class="summary-label">💸 Gastos</div><div class="summary-val" style="color:#EF9A9A">${formatCLP(m.expenses)}</div></div>
+            <div class="summary-divider"></div>
+            <div class="summary-item"><div class="summary-label">📈 Ahorro</div><div class="summary-val" style="color:#81C784">${m.rate}%</div></div>
+          </div>
+          <div style="color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:10px">Por categoría</div>
+          ${[
+            {icon:'🛒',label:'Supermercado',color:'#66BB6A',pct:65},
+            {icon:'⚽',label:'Deporte',color:'#81C784',pct:25},
+            {icon:'🍽️',label:'Restaurantes',color:'#4CAF50',pct:18},
+            {icon:'🚌',label:'Transporte',color:'#1B5E20',pct:12},
+          ].map(c=>`
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <span style="font-size:18px">${c.icon}</span>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="color:#ccc;font-size:12px">${c.label}</span>
+                <span style="color:#fff;font-size:12px;font-weight:600">${c.pct}%</span>
+              </div>
+              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${c.pct}%;background:${c.color}"></div></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('')}
+  `;
+}
+
+let activeFilter = 'all';
+let activeCat = null;
+
+function renderMovimientos() {
+  const filtered = TXS.filter(t => {
+    if(activeFilter==='out' && t.dir!=='out') return false;
+    if(activeFilter==='in'  && t.dir!=='in')  return false;
+    if(activeCat && t.cat!==activeCat) return false;
+    return true;
+  });
+
+  return `
+    <div class="screen-title">Movimientos</div>
+    <div class="filter-scroll">
+      ${['all','out','in'].map(f=>`
+        <div class="filter-chip ${activeFilter===f&&!activeCat?'active':''}" onclick="setFilter('${f}')">${f==='all'?'Todos':f==='out'?'💳 Gastos':'📥 Ingresos'}</div>
+      `).join('')}
+      <div style="width:1px;background:#2A2A2A;margin:4px 0;flex-shrink:0"></div>
+      ${CATS.map(c=>`
+        <div class="filter-chip ${activeCat===c.id?'active':''}" style="${activeCat===c.id?`border-color:${c.color};background:${c.color}20`:''}" onclick="setCatFilter('${c.id}')">${c.icon} ${c.label}</div>
+      `).join('')}
+    </div>
+    <div class="section-header"><span class="section-header-text">Hoy</span><span class="section-header-count">2</span></div>
+    ${filtered.filter(t=>t.daysAgo<=1).map(t=>renderTxItem(t)).join('')}
+    ${filtered.filter(t=>t.daysAgo>=2&&t.daysAgo<=3).length?`
+    <div class="section-header"><span class="section-header-text">Esta semana</span><span class="section-header-count">${filtered.filter(t=>t.daysAgo>=2&&t.daysAgo<=3).length}</span></div>
+    ${filtered.filter(t=>t.daysAgo>=2&&t.daysAgo<=3).map(t=>renderTxItem(t)).join('')}`:''}
+    ${filtered.filter(t=>t.daysAgo>=4).length?`
+    <div class="section-header"><span class="section-header-text">Antes</span><span class="section-header-count">${filtered.filter(t=>t.daysAgo>=4).length}</span></div>
+    ${filtered.filter(t=>t.daysAgo>=4).map(t=>renderTxItem(t)).join('')}`:''}
+  `;
+}
+
+function renderTxItem(t, forceExpand=false) {
+  const cat = getCat(t.cat);
+  const isIn = t.dir==='in';
+  const hasSplit = t.split!==null && t.dir==='out';
+  const displayAmt = hasSplit ? t.split.share : t.amount;
+  const srcIcon = t.src==='memory'?'🧠':t.src==='ai'?'✦ IA':'✓';
+  const isExpanded = forceExpand || expandedTx.has(t.id);
+
+  return `
+  <div class="tx-item ${isIn?'income':''} ${!t.cat&&t.dir==='out'?'pending-tx':''}" onclick="toggleTx('${t.id}')">
+    <div class="tx-row">
+      <div class="tx-icon-wrap" style="border-color:${isIn?'#4CAF5066':cat?cat.color+'55':'#FF8F0055'};background:${isIn?'#4CAF5018':cat?cat.color+'18':'#FF8F0018'}">
+        ${isIn?'📥':cat?cat.icon:'❓'}
+      </div>
+      <div class="tx-info">
+        <div class="tx-merchant">${t.merchant}</div>
+        <div class="tx-meta">${isIn?'📥 Ingreso':t.type==='compra'?'💳 Compra':'📄 Pago'} · ${timeAgo(t.daysAgo)}${hasSplit?' · 👥 Dividido':''}</div>
+      </div>
+      <div class="tx-amount-wrap">
+        <div class="tx-amount ${isIn?'in':'out'}">${isIn?'+':'-'}${formatCLP(displayAmt)}</div>
+        ${hasSplit?`<div style="color:#558B2F;font-size:10px;margin-top:1px">de ${formatCLP(t.amount)}</div>`:''}
+        ${!isIn&&!t.cat?`<div class="tx-badge pending">● PENDIENTE</div>`:
+          !isIn&&t.cat?`<div class="tx-badge ok">${srcIcon}</div>`:''}
+      </div>
+    </div>
+    ${isExpanded&&!isIn?`
+    <div class="tx-expanded">
+      ${hasSplit?`
+      <div class="split-card">
+        <div class="split-title">👥 ${t.split.desc}</div>
+        <div class="split-detail">Total pagado: ${formatCLP(t.amount)} ÷ ${t.split.people} personas</div>
+        <div class="split-detail">Tu parte: ${formatCLP(t.split.share)}</div>
+        <div class="split-recovered">Recuperado de amigos: ${formatCLP(t.split.rec)}</div>
+      </div>`:''}
+      ${!t.cat?`
+      <div class="cat-label-sm">Selecciona una categoría:</div>
+      <div class="cat-grid">
+        ${CATS.map(c=>`<div class="cat-chip" style="border-color:${c.color}55;background:${c.color}15" onclick="categorizeTx(event,'${t.id}','${c.id}')">${c.icon} ${c.label}</div>`).join('')}
+      </div>`:
+      `<div style="color:#aaa;font-size:12px">Categoría: ${cat?cat.icon+' '+cat.label:''}</div>`}
+    </div>`:''}
+  </div>`;
+}
+
+function renderPendientes() {
+  const pending = TXS.filter(t=>t.dir==='out'&&!t.cat);
+  if(pending.length===0) return `
+    <div class="screen-title">Pendientes</div>
+    <div class="empty-state">
+      <div class="empty-icon">✅</div>
+      <div class="empty-title">¡Todo al día!</div>
+      <div class="empty-sub">No hay gastos pendientes de categorizar.</div>
+    </div>`;
+  return `
+    <div class="screen-title">Pendientes</div>
+    <div class="pending-banner">
+      <div class="pending-banner-icon">⚠️</div>
+      <div>
+        <div class="pending-banner-title">${pending.length} gasto sin categorizar</div>
+        <div class="pending-banner-sub">Toca para asignarle una categoría.</div>
+      </div>
+    </div>
+    ${pending.map(t=>renderTxItem(t,true)).join('')}
+  `;
+}
+
+function renderAjustes() {
+  return `
+    <div class="screen-title">Ajustes</div>
+    <div class="settings-section">
+      <div class="settings-title">🤖 API Key de Anthropic</div>
+      <div class="settings-desc">Se usa para categorizar automáticamente los comercios no conocidos con Claude AI.</div>
+      <div class="key-row">
+        <input class="key-input" type="password" placeholder="sk-ant-api03-..." value="sk-ant-api03-●●●●●●●●●●●●●●●●"/>
+        <button class="show-btn">Ver</button>
+      </div>
+      <button class="settings-btn primary">Guardar API Key</button>
+      <a class="settings-link" href="#">Obtener key en console.anthropic.com →</a>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">🔔 Notificaciones Android</div>
+      <div class="perm-row">
+        <div class="perm-dot green"></div>
+        <span class="perm-text">Acceso a notificaciones activo ✓</span>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">🧠 Comercios recordados</div>
+      <div class="settings-desc">6 comercios recordados.</div>
+      ${[
+        {m:'jumbo las condes', cat:'🛒 Supermercado'},
+        {m:'smartfit',         cat:'⚽ Deporte'},
+        {m:'uber',             cat:'🚌 Transporte'},
+        {m:'starbucks',        cat:'🍽️ Restaurantes'},
+        {m:'cruz verde',       cat:'💊 Salud'},
+        {m:'empresa s.a.',     cat:'💼 Sueldo'},
+      ].map(e=>`
+      <div class="memory-row">
+        <div>
+          <div class="memory-merchant">${e.m}</div>
+          <div class="memory-cat">${e.cat}</div>
+        </div>
+        <span class="memory-del">✕</span>
+      </div>`).join('')}
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">🗃️ Datos</div>
+      <button class="settings-btn danger">Limpiar todos los datos</button>
+    </div>
+  `;
+}
+
+// ── MODAL RENDER ─────────────────────────────────────────────────
+function renderModal() {
+  return `
+  <div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">Nuevo movimiento</span>
+        <span class="modal-close" onclick="closeModal()">✕</span>
+      </div>
+      <div id="modal-body">
+        <div class="dir-btns">
+          <div class="dir-btn" onclick="showExpenseForm()">
+            <div class="dir-btn-icon">💳</div>
+            <div class="dir-btn-label">Gasto</div>
+            <div class="dir-btn-sub">Compras, pagos, transferencias</div>
+          </div>
+          <div class="dir-btn income-btn" onclick="showIncomeForm()">
+            <div class="dir-btn-icon">📥</div>
+            <div class="dir-btn-label">Ingreso</div>
+            <div class="dir-btn-sub">Sueldo, devoluciones, cobros</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderExpenseForm() {
+  return `
+    <div class="field-label">Pegar texto de notificación (opcional)</div>
+    <textarea class="field-input" rows="2" placeholder="Compra aprobada en JUMBO por $23.500..." style="resize:none;width:100%;font-family:inherit;line-height:1.5" oninput="parseNotifDemo(this.value)"></textarea>
+
+    <div class="field-label">Comercio *</div>
+    <input class="field-input" id="demo-merchant" type="text" placeholder="Ej: Jumbo Las Condes"/>
+
+    <div class="field-label">Monto (CLP) *</div>
+    <input class="field-input" id="demo-amount" type="number" placeholder="23500" oninput="updateAmtPreview(this.value)"/>
+    <div class="amount-preview" id="amt-preview"></div>
+
+    <div class="split-toggle" id="split-toggle" onclick="toggleSplit()">👥 Gasto compartido ▼</div>
+    <div id="split-section" style="display:none;background:#1E1E1E;border-radius:12px;padding:14px;margin-top:8px;border:1px solid #2A2A2A">
+      <div class="field-label">¿Entre cuántos se divide?</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        ${[2,3,4,5,6].map(n=>`<div onclick="setPeople(${n})" id="ppl${n}" style="width:40px;height:40px;border-radius:10px;background:#252525;border:1px solid #333;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#aaa;font-weight:600;font-size:14px;${n===4?'background:#2E7D32;border-color:#4CAF50;color:#fff':''}">${n}</div>`).join('')}
+      </div>
+      <div class="field-label" style="margin-top:10px">Descripción</div>
+      <input class="field-input" type="text" placeholder="Ej: Asado cumpleaños"/>
+      <div style="background:#2E7D3222;border-radius:8px;padding:10px;margin-top:10px;border:1px solid #2E7D3244;text-align:center;color:#81C784;font-size:13px;font-weight:600" id="split-preview">Tu parte: ${formatCLP(0)}</div>
+    </div>
+
+    <button class="add-submit" onclick="fakeAdd()">Agregar gasto</button>
+  `;
+}
+
+function renderIncomeForm() {
+  return `
+    <div class="field-label">Origen / Comercio *</div>
+    <input class="field-input" type="text" placeholder="Ej: Empresa S.A."/>
+    <div class="field-label">Monto (CLP) *</div>
+    <input class="field-input" type="number" placeholder="1200000" oninput="updateAmtPreview(this.value)"/>
+    <div class="amount-preview" id="amt-preview"></div>
+    <div class="field-label">Tipo de ingreso</div>
+    <div class="income-type-grid">
+      ${[{id:'sueldo',icon:'💼',label:'Sueldo'},{id:'devolucion',icon:'🔄',label:'Devolución / Cobro'},{id:'transferencia_in',icon:'📥',label:'Transferencia recibida'},{id:'otros_ingresos',icon:'💰',label:'Otros ingresos'}].map((it,i)=>`
+      <div class="income-type-btn ${i===0?'active':''}" onclick="selectIncomeType(this)">
+        <span class="income-type-icon">${it.icon}</span>
+        <span class="income-type-label">${it.label}</span>
+      </div>`).join('')}
+    </div>
+    <button class="add-submit" style="background:#1B5E20" onclick="fakeAdd()">Agregar ingreso</button>
+  `;
+}
+
+// ── STATE ─────────────────────────────────────────────────────────
+const tabs = {1:'resumen', 2:'movimientos'};
+const expandedTx = new Set();
+let splitOpen = false;
+let selectedPeople = 4;
+let activeModalPhone = null;
+
+function render(phoneId) {
+  const tab = tabs[phoneId];
+  const el  = document.getElementById(`content${phoneId}`);
+  if(tab==='resumen')      el.innerHTML = renderResumen();
+  else if(tab==='historial')    el.innerHTML = renderHistorial();
+  else if(tab==='movimientos')  el.innerHTML = renderMovimientos();
+  else if(tab==='pendientes')   el.innerHTML = renderPendientes();
+  else if(tab==='ajustes')      el.innerHTML = renderAjustes();
+}
+
+function switchTab(phoneId, tab) {
+  tabs[phoneId] = tab;
+  activeFilter = 'all'; activeCat = null;
+  const bar = document.querySelector(`#phone${phoneId} .tab-bar`);
+  bar.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+  const tabMap = {resumen:0, historial:1, movimientos:3, pendientes:4, ajustes:5};
+  if(tabMap[tab]!==undefined) bar.querySelectorAll('.tab-item')[tabMap[tab]]?.classList.add('active');
+  render(phoneId);
+}
+
+function toggleTx(id) {
+  if(expandedTx.has(id)) expandedTx.delete(id); else expandedTx.add(id);
+  render(1); render(2);
+}
+
+function categorizeTx(e, txId, catId) {
+  e.stopPropagation();
+  const tx = TXS.find(t=>t.id===txId);
+  if(tx) { tx.cat = catId; tx.src = 'manual'; }
+  expandedTx.delete(txId);
+  showToast(1, '✓ Categorizado', `${tx.merchant} → ${getCat(catId)?.label}`);
+  render(1); render(2);
+}
+
+function setFilter(f) { activeFilter=f; activeCat=null; render(1); render(2); }
+function setCatFilter(id) { activeCat = activeCat===id?null:id; activeFilter='all'; render(1); render(2); }
+
+function toggleMonth(i) {
+  const body  = document.getElementById(`mbody${i}`);
+  const chev  = document.getElementById(`chev${i}`);
+  const open  = body.style.display==='block';
+  body.style.display = open?'none':'block';
+  chev.textContent   = open?'▼':'▲';
+}
+
+function openModal(phoneId) {
+  activeModalPhone = phoneId;
+  const phone = document.getElementById(`phone${phoneId}`);
+  const existing = document.getElementById('modal');
+  if(existing) existing.remove();
+  const div = document.createElement('div');
+  div.innerHTML = renderModal();
+  phone.appendChild(div.firstElementChild);
+}
+
+function closeModal() {
+  const m = document.getElementById('modal');
+  if(m) m.remove();
+  activeModalPhone = null;
+}
+
+function handleModalClick(e) { if(e.target.id==='modal') closeModal(); }
+
+function showExpenseForm() {
+  document.getElementById('modal-title').textContent = '💳 Agregar gasto';
+  document.getElementById('modal-body').innerHTML = renderExpenseForm();
+  splitOpen = false;
+}
+
+function showIncomeForm() {
+  document.getElementById('modal-title').textContent = '📥 Agregar ingreso';
+  document.getElementById('modal-body').innerHTML = renderIncomeForm();
+}
+
+function toggleSplit() {
+  splitOpen = !splitOpen;
+  document.getElementById('split-section').style.display = splitOpen?'block':'none';
+  document.getElementById('split-toggle').textContent = `👥 Gasto compartido ${splitOpen?'▲':'▼'}`;
+  document.getElementById('split-toggle').classList.toggle('active', splitOpen);
+}
+
+function setPeople(n) {
+  selectedPeople = n;
+  [2,3,4,5,6].forEach(i => {
+    const el = document.getElementById(`ppl${i}`);
+    if(!el) return;
+    el.style.background = i===n?'#2E7D32':'#252525';
+    el.style.borderColor = i===n?'#4CAF50':'#333';
+    el.style.color = i===n?'#fff':'#aaa';
+  });
+  const amt = parseInt(document.getElementById('demo-amount')?.value||'0');
+  const prev = document.getElementById('split-preview');
+  if(prev) prev.textContent = `Tu parte: ${formatCLP(Math.round(amt/n))}`;
+}
+
+function updateAmtPreview(val) {
+  const n = parseInt(val)||0;
+  const el = document.getElementById('amt-preview');
+  if(el) el.textContent = n>0 ? formatCLP(n) : '';
+  const prev = document.getElementById('split-preview');
+  if(prev) prev.textContent = `Tu parte: ${formatCLP(Math.round(n/selectedPeople))}`;
+}
+
+function parseNotifDemo(text) {
+  const m = document.getElementById('demo-merchant');
+  const a = document.getElementById('demo-amount');
+  if(!m||!a) return;
+  const amtMatch = text.match(/\$\s?([\d]{1,3}(?:\.[\d]{3})*)/);
+  if(amtMatch) {
+    const amt = parseInt(amtMatch[1].replace(/\./g,''));
+    a.value = amt;
+    updateAmtPreview(amt);
+  }
+  const merchMatch = text.match(/en\s+([A-ZÁÉÍÓÚÑ][^\n\r$]{2,30?}?)(?:\s+por|\s*$)/i);
+  if(merchMatch) m.value = merchMatch[1].trim();
+}
+
+function selectIncomeType(el) {
+  document.querySelectorAll('.income-type-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function fakeAdd() {
+  closeModal();
+  showToast(activeModalPhone||1, '✓ Gasto registrado', 'Comercio → categorizado automáticamente');
+}
+
+function showToast(phoneId, title, body) {
+  const phone = document.getElementById(`phone${phoneId}`);
+  const old = phone.querySelector('.notif-toast');
+  if(old) old.remove();
+  const div = document.createElement('div');
+  div.className = 'notif-toast';
+  div.innerHTML = `<span class="notif-icon">🏦</span><div><div class="notif-title">${title}</div><div class="notif-body">${body}</div></div>`;
+  phone.appendChild(div);
+  setTimeout(()=>div.remove(), 3200);
+}
+
+// Initial render
+render(1);
+render(2);
+</script>
+</body>
+</html>
