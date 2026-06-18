@@ -3,884 +3,1044 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Falabella Finanzas — Demo</title>
+<title>Finanzas Chuma — Demo</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:linear-gradient(140deg,#050f05 0%,#0a1a0a 60%,#060e06 100%);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 16px;gap:28px;flex-wrap:wrap}
 
-  body { background: #0a0a0a; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 16px; gap: 32px; flex-wrap: wrap; }
+/* ── PHONE SHELL ── */
+.phone{width:375px;height:790px;background:#0c160c;border-radius:44px;border:2px solid #1a2e1a;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 80px rgba(0,166,81,.1),0 0 0 1px #152015,inset 0 1px 0 #243024;position:relative;flex-shrink:0}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:110px;height:28px;background:#0c160c;border-radius:0 0 18px 18px;z-index:99}
+.status-bar{height:44px;background:#0c160c;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;color:#fff;font-size:12px;font-weight:600;flex-shrink:0}
+.status-right{display:flex;gap:5px;align-items:center}
+.battery{width:20px;height:11px;border:1.5px solid #fff;border-radius:3px;position:relative;padding:1.5px}
+.battery::after{content:'';position:absolute;right:-4px;top:2.5px;width:3px;height:6px;background:#fff;border-radius:0 2px 2px 0}
+.battery-fill{width:72%;height:100%;background:#00A651;border-radius:1px}
 
-  /* Phone shell */
-  .phone {
-    width: 375px; height: 780px; background: #111; border-radius: 44px;
-    border: 2px solid #2a2a2a; overflow: hidden; display: flex; flex-direction: column;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px #1a1a1a, inset 0 1px 0 #333;
-    position: relative; flex-shrink: 0;
-  }
+/* ── SCREEN ── */
+.screen{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.tab-content{flex:1;overflow-y:auto;padding:0 14px 10px;scrollbar-width:none}
+.tab-content::-webkit-scrollbar{display:none}
 
-  .notch {
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 120px; height: 30px; background: #111; border-radius: 0 0 20px 20px; z-index: 99;
-  }
+/* ── TAB BAR ── */
+.tab-bar{height:74px;background:#101e10;border-top:1px solid #1a2e1a;display:flex;align-items:center;justify-content:space-around;padding:0 4px 8px;flex-shrink:0}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 8px;border-radius:10px;transition:background .15s;min-width:46px;position:relative}
+.tab-item:hover{background:#ffffff06}
+.tab-icon{font-size:19px;line-height:1}
+.tab-label{font-size:9px;color:#3a5a3a;font-weight:600}
+.tab-item.active .tab-label{color:#00A651}
+.add-btn{width:50px;height:50px;border-radius:25px;background:linear-gradient(145deg,#005a2a,#00A651);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:26px;color:#fff;margin-bottom:4px;box-shadow:0 4px 18px rgba(0,166,81,.35);border:none;transition:transform .1s;position:relative}
+.add-btn:hover{transform:scale(1.06)}
+.badge{position:absolute;top:-3px;right:-3px;background:#D84315;color:#fff;font-size:9px;font-weight:700;border-radius:9px;padding:1px 4px;min-width:14px;text-align:center}
 
-  .status-bar {
-    height: 44px; background: #111; display: flex; align-items: flex-end;
-    justify-content: space-between; padding: 0 24px 6px; color: #fff; font-size: 12px; font-weight: 600;
-    flex-shrink: 0;
-  }
-  .status-right { display: flex; gap: 6px; align-items: center; }
-  .battery { width: 22px; height: 12px; border: 1.5px solid #fff; border-radius: 3px; position: relative; padding: 2px; }
-  .battery::after { content:''; position: absolute; right: -4px; top: 3px; width: 3px; height: 6px; background: #fff; border-radius: 0 2px 2px 0; }
-  .battery-fill { width: 80%; height: 100%; background: #4CAF50; border-radius: 1px; }
+/* ── HEADERS ── */
+.screen-header{display:flex;align-items:flex-end;justify-content:space-between;padding:12px 0 10px}
+.screen-title{color:#e8e8e8;font-size:22px;font-weight:800}
+.screen-sub{color:#3a5a3a;font-size:11px;margin-top:1px}
+.month-selector{background:#1a2a1a;border-radius:14px;padding:4px 10px;color:#00A651;font-size:11px;font-weight:700;border:1px solid #2a3e2a;cursor:pointer;white-space:nowrap}
 
-  /* Screen content */
-  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-  .tab-content { flex: 1; overflow-y: auto; padding: 0 16px 12px; scrollbar-width: none; }
-  .tab-content::-webkit-scrollbar { display: none; }
+/* ── BALANCE CARD ── */
+.main-card{background:linear-gradient(145deg,#003318 0%,#005a2a 50%,#008040 100%);border-radius:18px;padding:16px;border:1px solid #00A65130;margin-bottom:12px;position:relative;overflow:hidden}
+.main-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:70px;background:rgba(255,255,255,.04)}
+.main-card::after{content:'';position:absolute;bottom:-25px;left:-25px;width:90px;height:90px;border-radius:45px;background:rgba(0,0,0,.12)}
+.card-label{color:rgba(255,255,255,.55);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.main-balance{font-size:32px;font-weight:800;color:#fff;margin-bottom:12px;line-height:1.1}
+.main-balance.neg{color:#FFCDD2}
+.sub-row{display:flex;gap:7px;margin-bottom:10px}
+.sub-card{flex:1;border-radius:10px;padding:9px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.09)}
+.sub-icon{font-size:13px;margin-bottom:2px}
+.sub-label{color:rgba(255,255,255,.5);font-size:9px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.4px}
+.sub-amt{font-size:12px;font-weight:700;color:#fff}
+.sub-amt.neg{color:#FFCDD2}
+.savings-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.savings-lbl{color:rgba(255,255,255,.5);font-size:10px}
+.savings-pct{font-size:12px;font-weight:800}
+.sbar{height:4px;background:rgba(0,0,0,.3);border-radius:2px;overflow:hidden}
+.sbar-fill{height:4px;border-radius:2px;transition:width .8s}
+.pending-alert{margin-top:8px;background:rgba(216,67,21,.18);border-radius:7px;padding:7px 9px;border:1px solid rgba(216,67,21,.3);color:#FFCC80;font-size:10px;font-weight:600;display:flex;align-items:center;gap:5px}
 
-  /* Bottom tab bar */
-  .tab-bar {
-    height: 76px; background: #1a1a1a; border-top: 1px solid #2a2a2a;
-    display: flex; align-items: center; justify-content: space-around; padding: 0 4px 10px;
-    flex-shrink: 0;
-  }
-  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 10px; border-radius: 12px; transition: background 0.15s; min-width: 52px; }
-  .tab-item:hover { background: #ffffff08; }
-  .tab-item.active .tab-label { color: #4CAF50; }
-  .tab-icon { font-size: 22px; line-height: 1; }
-  .tab-label { font-size: 10px; color: #555; font-weight: 500; }
-  .tab-item.active .tab-label { color: #4CAF50; }
+/* ── SECTION ── */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin:12px 0 7px}
+.sec-title{color:#c8c8c8;font-size:13px;font-weight:700}
+.sec-count{color:#3a5a3a;font-size:10px;font-weight:600}
 
-  .add-btn {
-    width: 52px; height: 52px; border-radius: 26px; background: #2E7D32;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    font-size: 26px; color: #fff; line-height: 1; margin-bottom: 6px;
-    box-shadow: 0 4px 16px rgba(76,175,80,0.4); border: none; transition: transform 0.1s;
-    position: relative;
-  }
-  .add-btn:hover { transform: scale(1.06); }
+/* ── CATEGORY ROW ── */
+.cat-row{background:#111e11;border-radius:11px;padding:9px 10px;margin-bottom:6px;border:1px solid #1a2a1a;border-left:3px solid;display:flex;align-items:center;gap:8px}
+.cat-icon-sm{font-size:17px;flex-shrink:0}
+.cat-info{flex:1;min-width:0}
+.cat-name{color:#d0d0d0;font-size:11px;font-weight:600}
+.cat-sub{color:#3a5a3a;font-size:9px;margin-top:1px}
+.cat-bar-bg{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:3px}
+.cat-bar-fill{height:3px;border-radius:2px}
+.cat-right{text-align:right;flex-shrink:0}
+.cat-amt{color:#e8e8e8;font-size:11px;font-weight:700}
+.cat-pct{color:#3a5a3a;font-size:9px;margin-top:2px}
 
-  .badge {
-    position: absolute; top: -4px; right: -4px; background: #FF8F00;
-    color: #fff; font-size: 10px; font-weight: 700; border-radius: 10px;
-    padding: 1px 5px; min-width: 16px; text-align: center;
-  }
+/* ── TX ITEM ── */
+.tx-item{background:#111e11;border-radius:11px;padding:10px 11px;border:1px solid #1a2a1a;border-left:3px solid #1a2a1a;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
+.tx-item:hover{border-color:#2a3a2a}
+.tx-item.income{border-left-color:#00A651!important}
+.tx-item.pending-tx{border-left-color:#D84315!important}
+.tx-row{display:flex;align-items:center;gap:9px}
+.tx-icon-wrap{width:38px;height:38px;border-radius:9px;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tx-info{flex:1;min-width:0}
+.tx-merchant{color:#d8d8d8;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{color:#3a5a3a;font-size:9px;margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.fuente-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:#1a2a1a;color:#3a6a3a;border:1px solid #2a3e2a;flex-shrink:0}
+.fuente-tag.cmr{background:#141e2a;color:#3a4a6a;border-color:#1e2a3a}
+.tx-right{text-align:right;flex-shrink:0}
+.tx-amt{font-size:12px;font-weight:700}
+.tx-amt.out{color:#e0e0e0}
+.tx-amt.in{color:#00A651}
+.tx-badge{font-size:9px;margin-top:1px;font-weight:600}
+.tx-badge.pend{color:#D84315}
+.tx-badge.ok{color:#4CAF50}
+.tx-expanded{margin-top:9px;padding-top:9px;border-top:1px solid #1a2a1a}
+.cat-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.cat-chip{padding:4px 8px;border-radius:14px;border:1.5px solid;display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;font-weight:600;color:#b0b0b0;transition:opacity .15s}
+.cat-chip:hover{opacity:.75}
 
-  /* Screen title */
-  .screen-title { color: #fff; font-size: 26px; font-weight: 800; margin-top: 16px; }
-  .screen-sub { color: #555; font-size: 13px; margin-top: 2px; margin-bottom: 16px; }
+/* ── HISTORIAL ── */
+.month-card{background:#111e11;border-radius:13px;margin-bottom:8px;border:1px solid #1a2a1a;overflow:hidden}
+.month-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 13px;cursor:pointer;border-left:3px solid #1a3a1a}
+.month-hdr.pos{border-left-color:#00A651}
+.month-hdr.neg{border-left-color:#D84315}
+.month-lbl{color:#d8d8d8;font-size:13px;font-weight:700}
+.month-meta{color:#3a5a3a;font-size:9px;margin-top:2px}
+.month-right{text-align:right}
+.month-bal{font-size:13px;font-weight:700}
+.month-chev{color:#3a5a3a;font-size:10px;margin-top:2px}
+.month-body{border-top:1px solid #1a2a1a;padding:11px 13px}
+.stats-row{display:flex;gap:5px;margin-bottom:10px}
+.stat-card{flex:1;background:#0c160c;border-radius:9px;padding:8px;border:1px solid #1a2a1a;text-align:center}
+.stat-lbl{color:#3a5a3a;font-size:8px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.stat-val{font-size:11px;font-weight:700}
+.mini-cat{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.mini-icon{font-size:13px}
+.mini-info{flex:1}
+.mini-row{display:flex;justify-content:space-between;margin-bottom:2px}
+.mini-name{color:#a0a0a0;font-size:10px}
+.mini-amt{color:#d0d0d0;font-size:10px;font-weight:600}
+.mini-bar{height:2px;background:#1a2a1a;border-radius:1px;overflow:hidden}
+.mini-fill{height:2px;border-radius:1px}
 
-  /* ── RESUMEN ────────────────────────── */
-  .main-card {
-    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%);
-    border-radius: 20px; padding: 20px; border: 1px solid #4CAF5044; margin-bottom: 18px;
-  }
-  .main-card-title { color: #81C784; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
-  .main-balance { font-size: 36px; font-weight: 800; color: #fff; margin-bottom: 16px; }
-  .sub-cards { display: flex; gap: 10px; margin-bottom: 14px; }
-  .sub-card { flex: 1; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
-  .sub-card-label { color: rgba(255,255,255,0.6); font-size: 11px; margin-bottom: 4px; }
-  .sub-card-amount { font-size: 14px; font-weight: 700; color: #fff; }
-  .sub-card-amount.expense { color: #EF9A9A; }
+/* ── FILTER ── */
+.filter-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:5px;margin-bottom:6px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.fchip{padding:4px 10px;border-radius:16px;background:#111e11;border:1px solid #1a2a1a;color:#4a6a4a;font-size:10px;font-weight:600;white-space:nowrap;cursor:pointer;transition:all .15s;flex-shrink:0}
+.fchip.active{border-color:#00A651;background:#00A65118;color:#66C870;font-weight:700}
 
-  .savings-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-  .savings-label { color: rgba(255,255,255,0.5); font-size: 12px; }
-  .savings-pct { color: #A5D6A7; font-size: 13px; font-weight: 700; }
-  .savings-bar { height: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; overflow: hidden; }
-  .savings-fill { height: 6px; background: #81C784; border-radius: 3px; transition: width 0.6s ease; }
+/* ── DATE SEPARATOR ── */
+.date-sep{color:#2a4a2a;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 0 3px;display:flex;justify-content:space-between;align-items:center}
+.date-sep-count{color:#1e3e1e}
 
-  .pending-alert { margin-top: 12px; background: rgba(255,143,0,0.15); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,143,0,0.3); color: #FFB74D; font-size: 12px; font-weight: 600; }
+/* ── PENDIENTES ── */
+.pend-banner{display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,#1a0d00,#2a1800);border-radius:11px;padding:10px 12px;border:1px solid #D8431530;margin-bottom:10px}
+.pend-icon{font-size:22px}
+.pend-title{color:#FFB74D;font-size:12px;font-weight:700}
+.pend-sub{color:#5a4a2a;font-size:10px;margin-top:1px}
 
-  .section-title { color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+/* ── AJUSTES ── */
+.set-sec{background:#111e11;border-radius:13px;padding:13px;margin-bottom:9px;border:1px solid #1a2a1a;border-left:3px solid #1a3a1a}
+.set-title{color:#d8d8d8;font-size:13px;font-weight:700;margin-bottom:3px}
+.set-desc{color:#3a5a3a;font-size:10px;margin-bottom:8px;line-height:1.5}
+.key-row{display:flex;gap:5px;margin-bottom:7px}
+.key-inp{flex:1;background:#0c160c;border-radius:8px;padding:10px;color:#d0d0d0;font-size:11px;border:1px solid #1a2a1a;outline:none}
+.show-btn{background:#1a2a1a;border-radius:8px;padding:0 10px;color:#4a6a4a;font-size:11px;font-weight:600;border:1px solid #2a3e2a;cursor:pointer;white-space:nowrap}
+.perm-row{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.perm-dot{width:7px;height:7px;border-radius:4px;background:#D84315}
+.perm-dot.ok{background:#00A651}
+.perm-txt{color:#a0a0a0;font-size:11px}
+.set-btn{border-radius:9px;padding:11px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:5px;border:none;width:100%}
+.set-btn.primary{background:linear-gradient(135deg,#005a2a,#00A651);color:#fff}
+.set-btn.danger{background:#190808;color:#EF9A9A;border:1px solid #4a1010}
+.mem-row{display:flex;align-items:center;gap:7px;padding:6px 0;border-top:1px solid #1a2a1a}
+.mem-name{color:#c0c0c0;font-size:11px}
+.mem-cat{color:#3a5a3a;font-size:9px;margin-top:1px}
+.mem-del{color:#2a3a2a;cursor:pointer;padding:3px 7px;font-size:12px;margin-left:auto}
 
-  .cat-row { background: #1E1E1E; border-radius: 12px; padding: 12px; margin-bottom: 8px; border: 1px solid #2A2A2A; }
-  .cat-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .cat-left { display: flex; align-items: center; gap: 10px; }
-  .cat-icon-sm { font-size: 20px; }
-  .cat-name { color: #fff; font-size: 13px; font-weight: 600; }
-  .cat-count { color: #555; font-size: 11px; margin-top: 1px; }
-  .cat-amount { color: #fff; font-size: 13px; font-weight: 700; }
-  .cat-pct { color: #666; font-size: 11px; text-align: right; }
-  .cat-bar-bg { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-  .cat-bar-fill { height: 4px; border-radius: 2px; transition: width 0.8s ease; }
+/* ── MODAL ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.84);display:flex;align-items:flex-end;z-index:50;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{background:#111e11;border-radius:18px 18px 0 0;width:100%;padding:0 16px 24px;max-height:88%;overflow-y:auto;scrollbar-width:none;animation:slideUp .25s cubic-bezier(.16,1,.3,1);border:1px solid #1a2a1a;border-bottom:none}
+.modal-sheet::-webkit-scrollbar{display:none}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:32px;height:3px;background:#1e2e1e;border-radius:2px;margin:10px auto 2px}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 0 10px;border-bottom:1px solid #1a2a1a;margin-bottom:5px}
+.modal-title{color:#d8d8d8;font-size:15px;font-weight:700}
+.modal-close{color:#3a5a3a;font-size:14px;cursor:pointer;padding:4px 7px;background:#1a2a1a;border-radius:7px}
+.dir-btns{display:flex;flex-direction:column;gap:8px;padding:10px 0}
+.dir-btn{background:#0c160c;border-radius:12px;padding:16px;text-align:center;cursor:pointer;border:1.5px solid #005a2a;transition:transform .1s}
+.dir-btn:hover{background:#111e11;transform:scale(.98)}
+.dir-btn.income-btn{border-color:#2E7D32}
+.dir-btn-icon{font-size:26px;margin-bottom:5px}
+.dir-btn-lbl{color:#d8d8d8;font-size:14px;font-weight:700;margin-bottom:2px}
+.dir-btn-sub{color:#3a5a3a;font-size:10px}
+.field-lbl{color:#3a5a3a;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 4px}
+.field-inp{background:#0c160c;border-radius:7px;padding:10px;color:#d0d0d0;font-size:12px;border:1px solid #1a2a1a;width:100%;outline:none}
+.field-inp::placeholder{color:#1e3a1e}
+.field-inp:focus{border-color:#00A65150}
+.amt-preview{color:#00A651;font-size:11px;font-weight:600;margin-top:2px}
+.add-submit{background:linear-gradient(135deg,#005a2a,#00A651);border-radius:11px;padding:13px;text-align:center;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;border:none;width:100%}
+.split-toggle{margin-top:9px;padding:9px;border-radius:7px;border:1.5px solid #1a3a1a30;background:#1a2a1a15;text-align:center;color:#4a8a4a;font-size:11px;font-weight:600;cursor:pointer}
+.split-toggle.active{border-color:#00A651;background:#00A65118}
+.income-type-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.itype-btn{flex:1;min-width:45%;padding:9px;border-radius:9px;background:#0c160c;border:1.5px solid #1a2a1a;text-align:center;cursor:pointer}
+.itype-btn.active{border-color:#00A651;background:#00A65115}
+.itype-icon{font-size:18px;display:block;margin-bottom:2px}
+.itype-lbl{color:#3a5a3a;font-size:9px;font-weight:600}
+.itype-btn.active .itype-lbl{color:#66C870}
 
-  /* ── TX ITEM ────────────────────────── */
-  .tx-item { background: #1E1E1E; border-radius: 14px; padding: 14px; border: 1px solid #2A2A2A; margin-bottom: 9px; cursor: pointer; transition: border-color 0.15s; }
-  .tx-item:hover { border-color: #3a3a3a; }
-  .tx-item.income { border-color: #4CAF5022; }
-  .tx-item.pending-tx { border-color: #FF8F0033; }
-  .tx-row { display: flex; align-items: center; gap: 12px; }
-  .tx-icon-wrap { width: 46px; height: 46px; border-radius: 12px; border: 1.5px solid; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-  .tx-info { flex: 1; }
-  .tx-merchant { color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tx-meta { color: #555; font-size: 10px; margin-top: 3px; }
-  .tx-amount-wrap { text-align: right; }
-  .tx-amount { font-size: 14px; font-weight: 700; }
-  .tx-amount.out { color: #fff; }
-  .tx-amount.in { color: #4CAF50; }
-  .tx-badge { font-size: 10px; margin-top: 2px; }
-  .tx-badge.pending { color: #FF8F00; font-weight: 600; }
-  .tx-badge.ok { color: #4CAF50; }
+/* ── TOAST ── */
+.notif-toast{position:absolute;top:50px;left:9px;right:9px;background:#1a2a1a;border-radius:11px;padding:9px 11px;border:1px solid #00A65135;z-index:100;display:flex;gap:7px;align-items:center;animation:slideDown .3s ease,fadeOut .4s ease 2.6s forwards}
+@keyframes slideDown{from{transform:translateY(-14px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+.toast-icon{font-size:16px}
+.toast-title{color:#d8d8d8;font-size:10px;font-weight:700}
+.toast-body{color:#3a6a3a;font-size:9px}
 
-  /* Expanded */
-  .tx-expanded { margin-top: 12px; padding-top: 12px; border-top: 1px solid #252525; }
-  .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .cat-chip { padding: 7px 10px; border-radius: 18px; border: 1.5px solid; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: opacity 0.15s; font-size: 11px; font-weight: 500; color: #ccc; }
-  .cat-chip:hover { opacity: 0.8; }
-  .cat-label-sm { color: #666; font-size: 11px; margin-bottom: 4px; }
+/* ── LEGEND ── */
+.legend{color:#ccc;max-width:290px}
+.legend h2{color:#00A651;font-size:20px;font-weight:800;margin-bottom:3px}
+.legend-sub{font-size:11px;color:#3a5a3a;line-height:1.6;margin-bottom:14px}
 
-  .split-card { background: #558B2F18; border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid #558B2F33; }
-  .split-title { color: #81C784; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
-  .split-detail { color: #aaa; font-size: 11px; margin-bottom: 2px; }
-  .split-recovered { color: #66BB6A; font-size: 11px; margin-top: 2px; }
+.icon-section{background:linear-gradient(145deg,#0a1a0a,#0e240e);border-radius:14px;padding:14px;border:1px solid #1a3a1a;margin-bottom:14px}
+.icon-section-title{color:#00A651;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.icon-opts{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.icon-opt{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+.icon-opt-lbl{color:#3a5a3a;font-size:9px;text-align:center;max-width:72px;line-height:1.4}
+.icon-opt-lbl.rec{color:#66A866;font-weight:700}
+.icon-note{color:#2a4a2a;font-size:9px;margin-top:8px;line-height:1.5;border-top:1px solid #1a2a1a;padding-top:8px}
+.icon-note strong{color:#4a7a4a}
 
-  /* ── HISTORIAL ──────────────────────── */
-  .month-card { background: #1E1E1E; border-radius: 16px; margin-bottom: 12px; border: 1px solid #2A2A2A; overflow: hidden; }
-  .month-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; cursor: pointer; }
-  .month-label { color: #fff; font-size: 16px; font-weight: 700; }
-  .month-meta { color: #555; font-size: 11px; margin-top: 3px; }
-  .month-balance { font-size: 16px; font-weight: 700; }
-  .month-chevron { color: #555; font-size: 11px; margin-top: 4px; text-align: right; }
-  .month-body { border-top: 1px solid #2A2A2A; padding: 16px; }
-  .summary-row { display: flex; background: #252525; border-radius: 12px; padding: 12px; margin-bottom: 16px; }
-  .summary-item { flex: 1; text-align: center; }
-  .summary-label { color: #666; font-size: 10px; margin-bottom: 4px; }
-  .summary-val { font-size: 13px; font-weight: 700; }
-  .summary-divider { width: 1px; background: #333; margin: 4px 0; }
+.legend-flow{background:#0c160c;border-radius:11px;padding:11px;border:1px solid #1a2a1a;margin-bottom:10px}
+.flow-title{color:#00A651;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.flow-step{display:flex;gap:7px;align-items:flex-start;margin-bottom:5px}
+.flow-num{width:16px;height:16px;border-radius:8px;background:linear-gradient(135deg,#005a2a,#00A651);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.flow-txt{color:#4a6a4a;font-size:10px;line-height:1.5}
+.flow-txt strong{color:#8aaa8a}
 
-  /* ── MODAL ──────────────────────────── */
-  .modal-overlay {
-    position: absolute; inset: 0; background: rgba(0,0,0,0.75);
-    display: flex; align-items: flex-end; z-index: 50;
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-  .modal-sheet {
-    background: #1A1A1A; border-radius: 24px 24px 0 0;
-    width: 100%; padding: 0 20px 32px; max-height: 88%;
-    overflow-y: auto; scrollbar-width: none;
-    animation: slideUp 0.25s cubic-bezier(0.16,1,0.3,1);
-  }
-  .modal-sheet::-webkit-scrollbar { display: none; }
-  @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 14px; border-bottom: 1px solid #2A2A2A; margin-bottom: 8px; }
-  .modal-title { color: #fff; font-size: 17px; font-weight: 700; }
-  .modal-close { color: #666; font-size: 18px; cursor: pointer; padding: 4px 8px; }
-  .modal-close:hover { color: #999; }
+.legend-tab{display:flex;gap:7px;align-items:flex-start;margin-bottom:7px;background:#0c160c;border-radius:9px;padding:9px;border:1px solid #1a2a1a}
+.lt-icon{font-size:16px;flex-shrink:0}
+.lt-title{color:#c0c0c0;font-size:11px;font-weight:700;margin-bottom:1px}
+.lt-desc{color:#3a5a3a;font-size:10px;line-height:1.4}
 
-  .dir-btns { display: flex; flex-direction: column; gap: 14px; padding: 16px 0; }
-  .dir-btn { background: #1E1E1E; border-radius: 16px; padding: 22px; text-align: center; cursor: pointer; border: 1.5px solid #2E7D32; transition: transform 0.1s, background 0.15s; }
-  .dir-btn:hover { background: #252525; transform: scale(0.98); }
-  .dir-btn.income-btn { border-color: #388E3C; }
-  .dir-btn-icon { font-size: 36px; margin-bottom: 8px; }
-  .dir-btn-label { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .dir-btn-sub { color: #666; font-size: 12px; }
-
-  .field-label { color: #888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 6px; }
-  .field-input { background: #252525; border-radius: 10px; padding: 13px; color: #fff; font-size: 14px; border: 1px solid #2A2A2A; width: 100%; outline: none; }
-  .field-input::placeholder { color: #444; }
-  .field-input:focus { border-color: #4CAF5055; }
-  .amount-preview { color: #4CAF50; font-size: 13px; font-weight: 600; margin-top: 4px; }
-
-  .add-submit { background: #2E7D32; border-radius: 14px; padding: 15px; text-align: center; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; border: none; width: 100%; }
-  .add-submit:hover { opacity: 0.85; }
-
-  .split-toggle { margin-top: 14px; padding: 12px; border-radius: 10px; border: 1.5px solid #558B2F55; background: #558B2F18; text-align: center; color: #81C784; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .split-toggle.active { border-color: #558B2F; background: #558B2F28; }
-
-  .income-type-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .income-type-btn { flex: 1; min-width: 45%; padding: 12px; border-radius: 12px; background: #252525; border: 1.5px solid #2A2A2A; text-align: center; cursor: pointer; transition: border-color 0.15s; }
-  .income-type-btn.active { border-color: #4CAF50; background: #4CAF5020; }
-  .income-type-icon { font-size: 22px; display: block; margin-bottom: 4px; }
-  .income-type-label { color: #888; font-size: 11px; font-weight: 600; }
-  .income-type-btn.active .income-type-label { color: #81C784; }
-
-  /* ── AJUSTES ────────────────────────── */
-  .settings-section { background: #1E1E1E; border-radius: 16px; padding: 16px; margin-bottom: 14px; border: 1px solid #2A2A2A; }
-  .settings-title { color: #fff; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .settings-desc { color: #666; font-size: 12px; margin-bottom: 12px; line-height: 1.5; }
-  .key-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .key-input { flex: 1; background: #252525; border-radius: 10px; padding: 13px; color: #fff; font-size: 13px; border: 1px solid #2A2A2A; outline: none; }
-  .show-btn { background: #252525; border-radius: 10px; padding: 0 14px; color: #888; font-size: 12px; font-weight: 600; border: 1px solid #2A2A2A; cursor: pointer; white-space: nowrap; }
-  .perm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .perm-dot { width: 10px; height: 10px; border-radius: 5px; background: #EF5350; }
-  .perm-dot.green { background: #4CAF50; }
-  .perm-text { color: #ccc; font-size: 13px; }
-  .settings-btn { border-radius: 12px; padding: 13px; text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 8px; border: none; width: 100%; }
-  .settings-btn.primary { background: #2E7D32; color: #fff; }
-  .settings-btn.secondary { background: #252525; color: #ccc; border: 1px solid #4CAF5044; }
-  .settings-btn.danger { background: #7f1d1d; color: #fff; }
-  .memory-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #2A2A2A; }
-  .memory-merchant { color: #fff; font-size: 13px; }
-  .memory-cat { color: #666; font-size: 11px; }
-  .memory-del { color: #555; cursor: pointer; padding: 4px 8px; font-size: 14px; margin-left: auto; }
-  .settings-link { color: #81C784; font-size: 12px; text-align: center; display: block; margin-top: 4px; }
-
-  /* Toasts / notification demo */
-  .notif-toast {
-    position: absolute; top: 60px; left: 12px; right: 12px;
-    background: #252525; border-radius: 14px; padding: 12px 14px;
-    border: 1px solid #4CAF5033; z-index: 100;
-    display: flex; gap: 10px; align-items: center;
-    animation: slideDown 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
-  }
-  @keyframes slideDown { from { transform: translateY(-20px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-  @keyframes fadeOut { from { opacity:1 } to { opacity:0 } }
-  .notif-icon { font-size: 20px; }
-  .notif-title { color: #fff; font-size: 12px; font-weight: 700; }
-  .notif-body { color: #888; font-size: 11px; }
-
-  /* Sidebar legend */
-  .legend { color: #ccc; max-width: 280px; }
-  .legend h2 { color: #4CAF50; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-  .legend p { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 20px; }
-  .legend-tab { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; background: #1a1a1a; border-radius: 12px; padding: 12px; border: 1px solid #2a2a2a; }
-  .legend-tab-icon { font-size: 22px; flex-shrink: 0; }
-  .legend-tab-title { color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
-  .legend-tab-desc { color: #666; font-size: 12px; line-height: 1.5; }
-  .legend-flow { background: #1a1a1a; border-radius: 12px; padding: 14px; border: 1px solid #2a2a2a; margin-bottom: 14px; }
-  .legend-flow-title { color: #4CAF50; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-  .flow-step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
-  .flow-num { width: 20px; height: 20px; border-radius: 10px; background: #2E7D32; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-  .flow-text { color: #888; font-size: 12px; line-height: 1.5; }
-  .flow-text strong { color: #ccc; }
-
-  /* Section header in list */
-  .section-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 4px; }
-  .section-header-text { color: #aaa; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-  .section-header-count { color: #555; font-size: 11px; }
-
-  /* Empty state */
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; gap: 8px; }
-  .empty-icon { font-size: 52px; }
-  .empty-title { color: #fff; font-size: 18px; font-weight: 800; }
-  .empty-sub { color: #888; font-size: 13px; text-align: center; }
-
-  /* Filter chips */
-  .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; scrollbar-width: none; }
-  .filter-scroll::-webkit-scrollbar { display: none; }
-  .filter-chip { padding: 7px 12px; border-radius: 20px; background: #1E1E1E; border: 1px solid #2A2A2A; color: #888; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
-  .filter-chip.active { border-color: #4CAF50; background: #4CAF5020; color: #A5D6A7; font-weight: 700; }
-
-  /* Pendientes banner */
-  .pending-banner { display: flex; align-items: center; gap: 12px; background: #FF8F0018; border-radius: 14px; padding: 14px; border: 1px solid #FF8F0040; margin-bottom: 16px; }
-  .pending-banner-icon { font-size: 28px; }
-  .pending-banner-title { color: #FFB74D; font-size: 14px; font-weight: 700; }
-  .pending-banner-sub { color: #888; font-size: 12px; margin-top: 2px; }
-
-  .tab-switch { display: flex; gap: 4px; flex-wrap: nowrap; }
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 16px;gap:5px}
+.empty-icon{font-size:40px}
+.empty-title{color:#d0d0d0;font-size:15px;font-weight:800}
+.empty-sub{color:#3a5a3a;font-size:11px;text-align:center;line-height:1.5}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ PHONE 1 — RESUMEN ══════════════════ -->
+<!-- PHONE 1 — RESUMEN -->
 <div class="phone" id="phone1">
   <div class="notch"></div>
-  <div class="status-bar">
-    <span>9:41</span>
-    <div class="status-right">
-      <span>📶</span>
-      <div class="battery"><div class="battery-fill"></div></div>
-    </div>
-  </div>
+  <div class="status-bar"><span>9:41</span><div class="status-right"><span style="font-size:11px">▲▲▲</span><div class="battery"><div class="battery-fill"></div></div></div></div>
   <div class="screen">
-    <div class="tab-content" id="content1">
-      <!-- Resumen por defecto -->
-    </div>
+    <div class="tab-content" id="content1"></div>
     <div class="tab-bar">
-      <div class="tab-item active" onclick="switchTab(1,'resumen')">
-        <span class="tab-icon">📊</span>
-        <span class="tab-label">Resumen</span>
-      </div>
-      <div class="tab-item" onclick="switchTab(1,'historial')">
-        <span class="tab-icon">📅</span>
-        <span class="tab-label">Historial</span>
-      </div>
-      <button class="add-btn" onclick="openModal(1)" style="position:relative">
-        +
-      </button>
-      <div class="tab-item" onclick="switchTab(1,'movimientos')">
-        <span class="tab-icon">💳</span>
-        <span class="tab-label">Movimientos</span>
-      </div>
-      <div class="tab-item" onclick="switchTab(1,'pendientes')" style="position:relative">
-        <span class="tab-icon">⚠️</span>
-        <span class="tab-label">Pendientes</span>
-        <span class="badge" style="position:absolute;top:4px;right:6px">1</span>
-      </div>
-      <div class="tab-item" onclick="switchTab(1,'ajustes')">
-        <span class="tab-icon">⚙️</span>
-        <span class="tab-label">Ajustes</span>
-      </div>
+      <div class="tab-item active" onclick="switchTab(1,'resumen')"><span class="tab-icon">📊</span><span class="tab-label">Resumen</span></div>
+      <div class="tab-item" onclick="switchTab(1,'historial')"><span class="tab-icon">📅</span><span class="tab-label">Historial</span></div>
+      <button class="add-btn" onclick="openModal(1)" style="position:relative">+<span class="badge" id="badge1">0</span></button>
+      <div class="tab-item" onclick="switchTab(1,'movimientos')"><span class="tab-icon">💳</span><span class="tab-label">Movimientos</span></div>
+      <div class="tab-item" onclick="switchTab(1,'pendientes')" style="position:relative"><span class="tab-icon">⏳</span><span class="tab-label">Pendientes</span></div>
+      <div class="tab-item" onclick="switchTab(1,'ajustes')"><span class="tab-icon">⚙️</span><span class="tab-label">Ajustes</span></div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════ PHONE 2 — MOVIMIENTOS ══════════════════ -->
+<!-- PHONE 2 — MOVIMIENTOS -->
 <div class="phone" id="phone2">
   <div class="notch"></div>
-  <div class="status-bar">
-    <span>9:41</span>
-    <div class="status-right">
-      <span>📶</span>
-      <div class="battery"><div class="battery-fill"></div></div>
-    </div>
-  </div>
+  <div class="status-bar"><span>9:41</span><div class="status-right"><span style="font-size:11px">▲▲▲</span><div class="battery"><div class="battery-fill"></div></div></div></div>
   <div class="screen">
-    <div class="tab-content" id="content2">
-    </div>
+    <div class="tab-content" id="content2"></div>
     <div class="tab-bar">
       <div class="tab-item" onclick="switchTab(2,'resumen')"><span class="tab-icon">📊</span><span class="tab-label">Resumen</span></div>
       <div class="tab-item" onclick="switchTab(2,'historial')"><span class="tab-icon">📅</span><span class="tab-label">Historial</span></div>
       <button class="add-btn" onclick="openModal(2)">+</button>
       <div class="tab-item active" onclick="switchTab(2,'movimientos')"><span class="tab-icon">💳</span><span class="tab-label">Movimientos</span></div>
-      <div class="tab-item" onclick="switchTab(2,'pendientes')" style="position:relative">
-        <span class="tab-icon">⚠️</span><span class="tab-label">Pendientes</span>
-        <span class="badge" style="position:absolute;top:4px;right:6px">1</span>
-      </div>
+      <div class="tab-item" onclick="switchTab(2,'pendientes')"><span class="tab-icon">⏳</span><span class="tab-label">Pendientes</span></div>
       <div class="tab-item" onclick="switchTab(2,'ajustes')"><span class="tab-icon">⚙️</span><span class="tab-label">Ajustes</span></div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════ LEGEND ══════════════════ -->
+<!-- LEGEND -->
 <div class="legend">
-  <h2>Falabella Finanzas</h2>
-  <p>Demo interactivo — toca las pestañas, el botón <strong style="color:#4CAF50">+</strong>, y los ítems de la lista para explorar.</p>
+  <h2>Finanzas Chuma</h2>
+  <p class="legend-sub">Demo interactivo — toca las pestañas, el botón <strong style="color:#00A651">+</strong> y los movimientos para explorar.</p>
 
-  <div class="legend-flow">
-    <div class="legend-flow-title">🤖 Flujo automático Android</div>
-    <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Llega notificación push del <strong>Banco Falabella</strong></div></div>
-    <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">El servicio nativo la <strong>intercepta en background</strong></div></div>
-    <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Parsea</strong> comercio, monto y tipo</div></div>
-    <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>Claude AI</strong> la categoriza automáticamente</div></div>
-    <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Aparece en la app con <strong>notificación de confirmación</strong></div></div>
+  <!-- ICON PROPOSAL -->
+  <div class="icon-section">
+    <div class="icon-section-title">💡 Propuesta de ícono</div>
+    <div class="icon-opts">
+      <!-- Option A: Shield + Chart (RECOMMENDED) -->
+      <div class="icon-opt">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="72" height="72">
+          <defs>
+            <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#003d18"/><stop offset="100%" stop-color="#00A651"/></linearGradient>
+          </defs>
+          <rect width="120" height="120" rx="26" fill="url(#gA)"/>
+          <path d="M60 18 L90 32 L90 64 Q90 86 60 98 Q30 86 30 64 L30 32 Z" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+          <rect x="28" y="74" width="14" height="24" rx="3" fill="white" opacity=".85"/>
+          <rect x="48" y="60" width="14" height="38" rx="3" fill="white" opacity=".92"/>
+          <rect x="68" y="44" width="14" height="54" rx="3" fill="white"/>
+          <path d="M34 70 L55 52 L75 38 L90 28" stroke="rgba(255,255,255,.4)" stroke-width="1.5" fill="none" stroke-dasharray="3,3"/>
+          <circle cx="90" cy="28" r="4" fill="white" opacity=".6"/>
+        </svg>
+        <span class="icon-opt-lbl rec">⭐ Recomendado<br>Escudo + Barras</span>
+      </div>
+      <!-- Option B: Lock + Arrow -->
+      <div class="icon-opt">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="72" height="72">
+          <defs>
+            <linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#004d20"/><stop offset="100%" stop-color="#007a38"/></linearGradient>
+          </defs>
+          <rect width="120" height="120" rx="26" fill="url(#gB)"/>
+          <rect x="34" y="58" width="52" height="40" rx="8" fill="rgba(255,255,255,.15)" stroke="white" stroke-width="2.5"/>
+          <path d="M44 58 L44 44 Q44 28 60 28 Q76 28 76 44 L76 58" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="60" cy="74" r="6" fill="white"/>
+          <rect x="58" y="74" width="4" height="10" rx="2" fill="white"/>
+          <path d="M78 22 L92 22 L92 36" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M80 40 L92 22" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="icon-opt-lbl">Candado<br>+ Flecha</span>
+      </div>
+      <!-- Option C: Coin + Trend -->
+      <div class="icon-opt">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="72" height="72">
+          <defs>
+            <linearGradient id="gC" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#002d10"/><stop offset="100%" stop-color="#006B35"/></linearGradient>
+          </defs>
+          <rect width="120" height="120" rx="26" fill="url(#gC)"/>
+          <circle cx="60" cy="58" r="30" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+          <circle cx="60" cy="58" r="22" fill="rgba(255,255,255,.1)" stroke="white" stroke-width="2"/>
+          <text x="60" y="65" text-anchor="middle" font-size="24" font-weight="800" fill="white" font-family="Arial">$</text>
+          <path d="M30 96 L50 80 L65 88 L90 64" stroke="#66C870" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="90" cy="64" r="4" fill="#66C870"/>
+        </svg>
+        <span class="icon-opt-lbl">Moneda<br>+ Tendencia</span>
+      </div>
+    </div>
+    <div class="icon-note">
+      Los tres usan <strong>#00A651</strong> y <strong>#006B35</strong> (verde Falabella).<br>
+      <strong>Recomendación:</strong> Opción A — el escudo sugiere seguridad, las barras muestran control financiero. Funciona bien en 48×48px.
+    </div>
   </div>
 
-  <div class="legend-tab"><div class="legend-tab-icon">📊</div><div><div class="legend-tab-title">Resumen</div><div class="legend-tab-desc">Balance del mes, tasa de ahorro, barras por categoría ordenadas de mayor a menor gasto.</div></div></div>
-  <div class="legend-tab"><div class="legend-tab-icon">📅</div><div><div class="legend-tab-title">Historial</div><div class="legend-tab-desc">Meses expandibles con ingresos, gastos y desglose por categoría.</div></div></div>
-  <div class="legend-tab"><div class="legend-tab-icon">💳</div><div><div class="legend-tab-title">Movimientos</div><div class="legend-tab-desc">Lista filtrable por dirección y categoría. Toca un ítem para ver detalle o categorizar.</div></div></div>
-  <div class="legend-tab"><div class="legend-tab-icon">⚠️</div><div><div class="legend-tab-title">Pendientes</div><div class="legend-tab-desc">Solo gastos sin categorizar, expandidos por defecto para categorizar rápido.</div></div></div>
-  <div class="legend-tab"><div class="legend-tab-icon">⚙️</div><div><div class="legend-tab-title">Ajustes</div><div class="legend-tab-desc">API Key, estado de permisos Android, memoria de comercios recordados.</div></div></div>
+  <div class="legend-flow">
+    <div class="flow-title">🤖 Flujo automático Android</div>
+    <div class="flow-step"><div class="flow-num">1</div><div class="flow-txt">Llega notificación push del <strong>Banco Falabella</strong></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div class="flow-txt">Servicio nativo la <strong>intercepta en background</strong></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div class="flow-txt"><strong>Parsea</strong> comercio, monto y tipo</div></div>
+    <div class="flow-step"><div class="flow-num">4</div><div class="flow-txt"><strong>Claude AI</strong> la categoriza automáticamente</div></div>
+    <div class="flow-step"><div class="flow-num">5</div><div class="flow-txt">Aparece en la app con <strong>notificación de confirmación</strong></div></div>
+  </div>
+
+  <div class="legend-tab"><div class="lt-icon">📊</div><div><div class="lt-title">Resumen</div><div class="lt-desc">Balance del mes actual, tasa de ahorro y gastos por categoría.</div></div></div>
+  <div class="legend-tab"><div class="lt-icon">📅</div><div><div class="lt-title">Historial</div><div class="lt-desc">6 meses reales (Ene–Jun 2026) con ingresos, gastos y categorías.</div></div></div>
+  <div class="legend-tab"><div class="lt-icon">💳</div><div><div class="lt-title">Movimientos</div><div class="lt-desc">275 movimientos reales. Filtra por mes o categoría.</div></div></div>
+  <div class="legend-tab"><div class="lt-icon">⏳</div><div><div class="lt-title">Pendientes</div><div class="lt-desc">Movimientos sin categoría para clasificar manualmente.</div></div></div>
+  <div class="legend-tab"><div class="lt-icon">⚙️</div><div><div class="lt-title">Ajustes</div><div class="lt-desc">API Key de Claude, permisos Android, memoria de comercios.</div></div></div>
 </div>
 
 <script>
-// ── DATA ─────────────────────────────────────────────────────────
-const CATS = [
-  {id:'supermercado', icon:'🛒', label:'Supermercado', color:'#66BB6A'},
-  {id:'transporte',   icon:'🚌', label:'Transporte',   color:'#1B5E20'},
-  {id:'restaurantes', icon:'🍽️', label:'Restaurantes', color:'#4CAF50'},
-  {id:'deporte',      icon:'⚽', label:'Deporte',      color:'#81C784'},
-  {id:'salud',        icon:'💊', label:'Salud',        color:'#33691E'},
-  {id:'carrete',      icon:'🎉', label:'Carrete',      color:'#558B2F'},
-  {id:'ropa',         icon:'👕', label:'Ropa',         color:'#43A047'},
-  {id:'departamento', icon:'🏠', label:'Departamento', color:'#388E3C'},
-  {id:'inversiones',  icon:'📈', label:'Inversiones',  color:'#2E7D32'},
+// ── CATEGORÍAS ──────────────────────────────────────────
+const CATS = {
+  supermercado: {icon:'🛒',label:'Supermercado',  color:'#43A047'},
+  departamento: {icon:'🏠',label:'Depto/Arriendo', color:'#388E3C'},
+  restaurantes: {icon:'🍽️',label:'Restaurantes',   color:'#4CAF50'},
+  salud_deporte:{icon:'💪',label:'Salud y Deporte',color:'#66BB6A'},
+  carrete:      {icon:'🎉',label:'Carrete',         color:'#558B2F'},
+  transporte:   {icon:'🚗',label:'Transporte',      color:'#2E7D32'},
+  inversiones:  {icon:'📈',label:'Inversiones',     color:'#1B5E20'},
+  entretenim:   {icon:'🎮',label:'Entretención',    color:'#81C784'},
+  compras_imp:  {icon:'🛍️',label:'Compras',         color:'#A5D6A7'},
+  suscripciones:{icon:'📱',label:'Suscripciones',   color:'#00838F'},
+  regalos:      {icon:'🎁',label:'Regalos',          color:'#80CBC4'},
+  otras:        {icon:'❓',label:'Otras',            color:'#78909C'},
+  ingreso:      {icon:'📥',label:'Ingreso',          color:'#00A651'},
+};
+
+// ── DATOS REALES (275 movimientos) ──────────────────────
+const TXS=[
+{m:"→ soledad ferna",a:8000,d:"out",c:"otras",dt:"2026-06-11",f:"CC"},
+{m:"→ magdalena cas",a:10000,d:"out",c:"entretenim",dt:"2026-06-11",f:"CC"},
+{m:"PAC Credito Hipotecario",a:330196,d:"out",c:"departamento",dt:"2026-06-10",f:"CC"},
+{m:"→ rodrigo corre",a:20800,d:"out",c:"salud_deporte",dt:"2026-06-09",f:"CC"},
+{m:"→ fernanda garc",a:8000,d:"out",c:"otras",dt:"2026-06-09",f:"CC"},
+{m:"← Maria Ovalle Gana",a:230000,d:"in",c:"ingreso",dt:"2026-06-08",f:"CC"},
+{m:"→ alvaro mery",a:30000,d:"out",c:"entretenim",dt:"2026-06-08",f:"CC"},
+{m:"LIDER.CL DIRECT*",a:73820,d:"out",c:"supermercado",dt:"2026-06-07",f:"CMR"},
+{m:"CANDELARIA",a:25000,d:"out",c:"carrete",dt:"2026-06-06",f:"CMR"},
+{m:"MERCADOPAGO *BENJAMIN",a:7000,d:"out",c:"entretenim",dt:"2026-06-06",f:"CMR"},
+{m:"EVENTOS KROSS",a:5000,d:"out",c:"entretenim",dt:"2026-06-06",f:"CMR"},
+{m:"MERCADOPAGO *MANONEGR*",a:12000,d:"out",c:"entretenim",dt:"2026-06-06",f:"CMR"},
+{m:"ANTHROPIC* CLAUDE SUB",a:22054,d:"out",c:"suscripciones",dt:"2026-06-05",f:"CMR"},
+{m:"← Maria Ovalle Gana",a:250000,d:"in",c:"ingreso",dt:"2026-06-04",f:"CC"},
+{m:"FALABELLA.COM",a:479981,d:"out",c:"otras",dt:"2026-06-03",f:"CMR"},
+{m:"FALABELLA.COM",a:44990,d:"out",c:"departamento",dt:"2026-06-03",f:"CMR"},
+{m:"MERCADOPAGO *MOVILLAN",a:6555,d:"out",c:"otras",dt:"2026-06-03",f:"CMR"},
+{m:"FABRICS",a:48085,d:"out",c:"departamento",dt:"2026-06-03",f:"CMR"},
+{m:"→ antonio verga",a:9885,d:"out",c:"carrete",dt:"2026-06-03",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:710000,d:"in",c:"ingreso",dt:"2026-06-02",f:"CC"},
+{m:"IMPUESTO CUOTAS FALABELLA",a:2317,d:"out",c:"compras_imp",dt:"2026-06-01",f:"CMR"},
+{m:"FALABELLA.COM",a:584991,d:"out",c:"compras_imp",dt:"2026-06-01",f:"CMR"},
+{m:"NEAT PAYER 1",a:1470155,d:"out",c:"departamento",dt:"2026-06-01",f:"CMR"},
+{m:"MP *COMERCIALFHCSPA",a:27133,d:"out",c:"salud_deporte",dt:"2026-06-01",f:"CMR"},
+{m:"→ khipu CLBS C",a:22742,d:"out",c:"otras",dt:"2026-06-01",f:"CC"},
+{m:"→ comunidad edi",a:500000,d:"out",c:"departamento",dt:"2026-06-01",f:"CC"},
+{m:"→ caterina leyl",a:156000,d:"out",c:"departamento",dt:"2026-06-01",f:"CC"},
+{m:"← Benjamin Richasse",a:619254,d:"in",c:"ingreso",dt:"2026-06-01",f:"CC"},
+{m:"OKM NUEVA LAS CONDES",a:1290,d:"out",c:"supermercado",dt:"2026-05-29",f:"CMR"},
+{m:"MERCADOPAGO *BLACKCHI",a:15378,d:"out",c:"restaurantes",dt:"2026-05-29",f:"CMR"},
+{m:"← Domingo Correa Ovalle",a:119638,d:"in",c:"ingreso",dt:"2026-05-29",f:"CC"},
+{m:"→ nicolas varel",a:5000,d:"out",c:"regalos",dt:"2026-05-28",f:"CC"},
+{m:"Remuneraciones",a:3135620,d:"in",c:"ingreso",dt:"2026-05-28",f:"CC"},
+{m:"CASILLA DEPORTES SPO",a:7000,d:"out",c:"salud_deporte",dt:"2026-05-27",f:"CMR"},
+{m:"TUU*CLUB DE GOLF SPORT",a:17875,d:"out",c:"salud_deporte",dt:"2026-05-27",f:"CMR"},
+{m:"CASILLA DEPORTES SPO",a:13000,d:"out",c:"salud_deporte",dt:"2026-05-27",f:"CMR"},
+{m:"↩ CASILLA DEPORTES",a:13000,d:"in",c:"salud_deporte",dt:"2026-05-27",f:"CMR"},
+{m:"Devolucion de Impuesto",a:49962,d:"in",c:"ingreso",dt:"2026-05-27",f:"CC"},
+{m:"→ nicolas heski",a:15000,d:"out",c:"entretenim",dt:"2026-05-26",f:"CC"},
+{m:"→ jorge sarquis",a:15000,d:"out",c:"carrete",dt:"2026-05-26",f:"CC"},
+{m:"FORK NUEVA LAS CONDES",a:4613,d:"out",c:"restaurantes",dt:"2026-05-25",f:"CMR"},
+{m:"UBER *LIME",a:957,d:"out",c:"transporte",dt:"2026-05-24",f:"CMR"},
+{m:"WWW.ALIEXPRESS.COM",a:38918,d:"out",c:"compras_imp",dt:"2026-05-24",f:"CMR"},
+{m:"LIDER.CL",a:80972,d:"out",c:"supermercado",dt:"2026-05-24",f:"CMR"},
+{m:"COPEC ZERVO",a:40000,d:"out",c:"transporte",dt:"2026-05-24",f:"CMR"},
+{m:"IL MAESTRALE",a:7400,d:"out",c:"restaurantes",dt:"2026-05-24",f:"CMR"},
+{m:"UBER",a:12701,d:"out",c:"transporte",dt:"2026-05-24",f:"CMR"},
+{m:"MAX",a:14990,d:"out",c:"suscripciones",dt:"2026-05-24",f:"CMR"},
+{m:"↩ WWW.ALIEXPRESS.COM",a:38918,d:"in",c:"compras_imp",dt:"2026-05-24",f:"CMR"},
+{m:"LOS COLIGUES",a:6870,d:"out",c:"supermercado",dt:"2026-05-23",f:"CMR"},
+{m:"FALABELLA.COM",a:36292,d:"out",c:"otras",dt:"2026-05-21",f:"CMR"},
+{m:"LIDER.CL",a:47070,d:"out",c:"supermercado",dt:"2026-05-19",f:"CMR"},
+{m:"→ maria parot",a:8000,d:"out",c:"regalos",dt:"2026-05-19",f:"CC"},
+{m:"WELLHUB CL",a:49990,d:"out",c:"salud_deporte",dt:"2026-05-18",f:"CMR"},
+{m:"FORK NUEVA LAS CONDES",a:5593,d:"out",c:"restaurantes",dt:"2026-05-18",f:"CMR"},
+{m:"→ nicolas lasse",a:7800,d:"out",c:"restaurantes",dt:"2026-05-18",f:"CC"},
+{m:"FALABELLA",a:35992,d:"out",c:"compras_imp",dt:"2026-05-17",f:"CMR"},
+{m:"SABA ARAUCO KENNEDY",a:800,d:"out",c:"transporte",dt:"2026-05-17",f:"CMR"},
+{m:"UNIMARC LOS TRAPENSES",a:53110,d:"out",c:"carrete",dt:"2026-05-16",f:"CMR"},
+{m:"MERCADOPAGO *SUR365SP",a:11700,d:"out",c:"supermercado",dt:"2026-05-16",f:"CMR"},
+{m:"JUMBO MARKET LO CASTILLO",a:43670,d:"out",c:"supermercado",dt:"2026-05-15",f:"CMR"},
+{m:"→ BTG Pactual",a:1500000,d:"out",c:"inversiones",dt:"2026-05-15",f:"CC"},
+{m:"→ BTG Pactual",a:2000000,d:"out",c:"inversiones",dt:"2026-05-15",f:"CC"},
+{m:"MERCADOPAGO *SUSHIBLU",a:7590,d:"out",c:"restaurantes",dt:"2026-05-14",f:"CMR"},
+{m:"→ asesorias dcv",a:1500000,d:"out",c:"inversiones",dt:"2026-05-14",f:"CC"},
+{m:"→ matias belger",a:51129,d:"out",c:"entretenim",dt:"2026-05-14",f:"CC"},
+{m:"PAGO SERVIPAG",a:16729,d:"out",c:"departamento",dt:"2026-05-14",f:"CC"},
+{m:"← AREA CERO PROPIEDADES",a:537333,d:"in",c:"ingreso",dt:"2026-05-13",f:"CC"},
+{m:"← AREA CERO PROPIEDADES",a:315000,d:"in",c:"ingreso",dt:"2026-05-13",f:"CC"},
+{m:"→ francisco jos",a:10500,d:"out",c:"carrete",dt:"2026-05-12",f:"CC"},
+{m:"→ asesorias dcv",a:500000,d:"out",c:"inversiones",dt:"2026-05-12",f:"CC"},
+{m:"← Santiago Toro Vidal",a:51000,d:"in",c:"ingreso",dt:"2026-05-11",f:"CC"},
+{m:"PAC Credito Hipotecario",a:251590,d:"out",c:"departamento",dt:"2026-05-11",f:"CC"},
+{m:"→ carlos mena",a:8000,d:"out",c:"regalos",dt:"2026-05-08",f:"CC"},
+{m:"Remuneraciones",a:28686,d:"in",c:"ingreso",dt:"2026-05-08",f:"CC"},
+{m:"→ magdalena cas",a:45000,d:"out",c:"entretenim",dt:"2026-05-05",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:716473,d:"in",c:"ingreso",dt:"2026-05-05",f:"CC"},
+{m:"→ tomas latorre",a:50000,d:"out",c:"carrete",dt:"2026-05-05",f:"CC"},
+{m:"→ caterina leyl",a:10000,d:"out",c:"departamento",dt:"2026-05-04",f:"CC"},
+{m:"→ caterina leyl",a:185000,d:"out",c:"departamento",dt:"2026-05-04",f:"CC"},
+{m:"← Benjamin Richasse",a:626473,d:"in",c:"ingreso",dt:"2026-05-04",f:"CC"},
+{m:"→ Enrique Ortiz",a:1450000,d:"out",c:"departamento",dt:"2026-05-04",f:"CC"},
+{m:"→ khipu CLBS C",a:22742,d:"out",c:"otras",dt:"2026-04-30",f:"CC"},
+{m:"→ felipe eneros",a:14587,d:"out",c:"carrete",dt:"2026-04-30",f:"CC"},
+{m:"→ romero martin",a:35000,d:"out",c:"salud_deporte",dt:"2026-04-30",f:"CC"},
+{m:"Remuneraciones",a:3154042,d:"in",c:"ingreso",dt:"2026-04-28",f:"CC"},
+{m:"→ vicente rodri",a:14770,d:"out",c:"regalos",dt:"2026-04-27",f:"CC"},
+{m:"→ andres humud",a:140000,d:"out",c:"entretenim",dt:"2026-04-22",f:"CC"},
+{m:"← FABIOLA YOLANDGONZALEZ",a:3500,d:"in",c:"ingreso",dt:"2026-04-15",f:"CC"},
+{m:"SIROKO",a:73100,d:"out",c:"salud_deporte",dt:"2026-04-13",f:"CMR"},
+{m:"PAGO SERVIPAG",a:36350,d:"out",c:"departamento",dt:"2026-04-13",f:"CC"},
+{m:"PAYU *ADIDAS",a:49990,d:"out",c:"salud_deporte",dt:"2026-04-12",f:"CMR"},
+{m:"SegFala CL SOAP",a:7490,d:"out",c:"suscripciones",dt:"2026-04-12",f:"CMR"},
+{m:"TIP Y TAP VITACURA",a:59400,d:"out",c:"restaurantes",dt:"2026-04-11",f:"CMR"},
+{m:"GUACAMOLE PRESIDENTE R",a:6900,d:"out",c:"restaurantes",dt:"2026-04-10",f:"CMR"},
+{m:"← FABIOLA YOLANDGONZALEZ",a:120000,d:"in",c:"ingreso",dt:"2026-04-10",f:"CC"},
+{m:"MERCADOPAGO *SUSHI",a:8790,d:"out",c:"restaurantes",dt:"2026-04-09",f:"CMR"},
+{m:"↩ TOTTUS APP",a:2004,d:"in",c:"supermercado",dt:"2026-04-07",f:"CMR"},
+{m:"TOTTUS APP",a:39708,d:"out",c:"supermercado",dt:"2026-04-06",f:"CMR"},
+{m:"→ Silvia Cacere",a:3000,d:"out",c:"otras",dt:"2026-04-06",f:"CC"},
+{m:"→ FABIOLA YOLAN",a:10000,d:"out",c:"restaurantes",dt:"2026-04-06",f:"CC"},
+{m:"MERCADOPAGO *MARCELAL",a:1600,d:"out",c:"otras",dt:"2026-04-04",f:"CMR"},
+{m:"RedGloba*MARIBEL GAMBO",a:2300,d:"out",c:"otras",dt:"2026-04-04",f:"CMR"},
+{m:"FARMACIA CONDELL",a:14990,d:"out",c:"salud_deporte",dt:"2026-04-04",f:"CMR"},
+{m:"MARTA ELENA FUENZALI",a:1900,d:"out",c:"otras",dt:"2026-04-04",f:"CMR"},
+{m:"MERCADOPAGO *MARCELAL",a:11600,d:"out",c:"otras",dt:"2026-04-02",f:"CMR"},
+{m:"← Benjamin Richasse",a:636973,d:"in",c:"ingreso",dt:"2026-04-02",f:"CC"},
+{m:"← Francisco Javier Garci",a:18000,d:"in",c:"ingreso",dt:"2026-04-02",f:"CC"},
+{m:"FALABELLA.COM",a:42970,d:"out",c:"compras_imp",dt:"2026-04-01",f:"CMR"},
+{m:"→ romero martin",a:35000,d:"out",c:"salud_deporte",dt:"2026-04-01",f:"CC"},
+{m:"OTROSPAGOS COM COND",a:336229,d:"out",c:"departamento",dt:"2026-03-30",f:"CMR"},
+{m:"← FRANCISCO JOSE RENCORET",a:112073,d:"in",c:"ingreso",dt:"2026-03-30",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:78230,d:"in",c:"ingreso",dt:"2026-03-30",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:536667,d:"in",c:"ingreso",dt:"2026-03-30",f:"CC"},
+{m:"→ Enrique Ortiz",a:1450000,d:"out",c:"departamento",dt:"2026-03-30",f:"CC"},
+{m:"→ diego bravo",a:17350,d:"out",c:"otras",dt:"2026-03-30",f:"CC"},
+{m:"SABA ARAUCO KENNEDY",a:1000,d:"out",c:"transporte",dt:"2026-03-29",f:"CMR"},
+{m:"FALABELLA.COM",a:39912,d:"out",c:"compras_imp",dt:"2026-03-29",f:"CMR"},
+{m:"LOS COLIGUES",a:3490,d:"out",c:"supermercado",dt:"2026-03-28",f:"CMR"},
+{m:"TAYPA",a:90200,d:"out",c:"restaurantes",dt:"2026-03-28",f:"CMR"},
+{m:"PedidosYa*Margo Isidor",a:6000,d:"out",c:"restaurantes",dt:"2026-03-28",f:"CMR"},
+{m:"PATIO BELLAVISTA",a:6800,d:"out",c:"restaurantes",dt:"2026-03-28",f:"CMR"},
+{m:"MP *MARATHON",a:179992,d:"out",c:"salud_deporte",dt:"2026-03-27",f:"CMR"},
+{m:"Remuneraciones",a:3182557,d:"in",c:"ingreso",dt:"2026-03-27",f:"CC"},
+{m:"↩ TOTTUS APP",a:20453,d:"in",c:"supermercado",dt:"2026-03-26",f:"CMR"},
+{m:"TOTTUS APP",a:122108,d:"out",c:"supermercado",dt:"2026-03-25",f:"CMR"},
+{m:"→ juegosyk",a:35000,d:"out",c:"entretenim",dt:"2026-03-25",f:"CC"},
+{m:"Remuneraciones",a:193029,d:"in",c:"ingreso",dt:"2026-03-25",f:"CC"},
+{m:"→ Enrique Ortiz",a:234690,d:"out",c:"departamento",dt:"2026-03-24",f:"CC"},
+{m:"MP *WHOOSHCLSPA",a:175,d:"out",c:"transporte",dt:"2026-03-23",f:"CMR"},
+{m:"MP *WHOOSHCLSPA",a:3995,d:"out",c:"transporte",dt:"2026-03-23",f:"CMR"},
+{m:"→ khipu CLBS C",a:18742,d:"out",c:"otras",dt:"2026-03-23",f:"CC"},
+{m:"→ caterina acos",a:39000,d:"out",c:"departamento",dt:"2026-03-23",f:"CC"},
+{m:"COMERCIAL Y SERVICIOS",a:30300,d:"out",c:"salud_deporte",dt:"2026-03-22",f:"CMR"},
+{m:"LOS COLIGUES",a:2590,d:"out",c:"supermercado",dt:"2026-03-21",f:"CMR"},
+{m:"FALABELLA.COM",a:23984,d:"out",c:"compras_imp",dt:"2026-03-21",f:"CMR"},
+{m:"VITACURA-748",a:9382,d:"out",c:"restaurantes",dt:"2026-03-20",f:"CMR"},
+{m:"VITACURA 2",a:552,d:"out",c:"restaurantes",dt:"2026-03-20",f:"CMR"},
+{m:"MERCADOPAGO *VENDEME",a:3000,d:"out",c:"compras_imp",dt:"2026-03-20",f:"CMR"},
+{m:"CANDELARIA",a:25000,d:"out",c:"carrete",dt:"2026-03-20",f:"CMR"},
+{m:"MP *WALDOSPROVI",a:38956,d:"out",c:"compras_imp",dt:"2026-03-19",f:"CMR"},
+{m:"MERCADOPAGO *SUSHIBLU",a:6293,d:"out",c:"restaurantes",dt:"2026-03-19",f:"CMR"},
+{m:"→ teresita rodr",a:14838,d:"out",c:"carrete",dt:"2026-03-17",f:"CC"},
+{m:"→ Unired",a:32874,d:"out",c:"transporte",dt:"2026-03-16",f:"CC"},
+{m:"SABA ARAUCO KENNEDY",a:800,d:"out",c:"transporte",dt:"2026-03-15",f:"CMR"},
+{m:"MP *ARUEDA",a:100830,d:"out",c:"salud_deporte",dt:"2026-03-15",f:"CMR"},
+{m:"FALABELLA.COM",a:47691,d:"out",c:"compras_imp",dt:"2026-03-15",f:"CMR"},
+{m:"ARAMCO",a:10080,d:"out",c:"restaurantes",dt:"2026-03-14",f:"CMR"},
+{m:"LOS COLIGUES",a:3180,d:"out",c:"supermercado",dt:"2026-03-14",f:"CMR"},
+{m:"ARAMCO",a:8300,d:"out",c:"restaurantes",dt:"2026-03-14",f:"CMR"},
+{m:"↩ TOTTUS APP",a:2726,d:"in",c:"supermercado",dt:"2026-03-13",f:"CMR"},
+{m:"TOTTUS APP",a:35047,d:"out",c:"supermercado",dt:"2026-03-13",f:"CMR"},
+{m:"MP *WHOOSHCLSPA",a:1720,d:"out",c:"transporte",dt:"2026-03-13",f:"CMR"},
+{m:"→ caterina acos",a:39000,d:"out",c:"departamento",dt:"2026-03-13",f:"CC"},
+{m:"TERREX PARQUE ARAUCO",a:5000,d:"out",c:"salud_deporte",dt:"2026-03-10",f:"CMR"},
+{m:"IMPUESTO REDBANC ATM",a:119,d:"out",c:"otras",dt:"2026-03-09",f:"CMR"},
+{m:"→ tomas latorre",a:55000,d:"out",c:"carrete",dt:"2026-03-09",f:"CC"},
+{m:"AVANCE REDBANC ATM",a:30000,d:"out",c:"otras",dt:"2026-03-08",f:"CMR"},
+{m:"TUU*HOT DO HOME",a:6590,d:"out",c:"restaurantes",dt:"2026-03-08",f:"CMR"},
+{m:"MERCADOPAGO *COLIBRI",a:11770,d:"out",c:"otras",dt:"2026-03-08",f:"CMR"},
+{m:"TOTTUS APP",a:53937,d:"out",c:"supermercado",dt:"2026-03-08",f:"CMR"},
+{m:"SENDERO DEL SOL SPA",a:1800,d:"out",c:"salud_deporte",dt:"2026-03-07",f:"CMR"},
+{m:"JUMBO LA SERENA",a:12715,d:"out",c:"supermercado",dt:"2026-03-06",f:"CMR"},
+{m:"MERCADOPAGO *MERCADOL",a:20058,d:"out",c:"compras_imp",dt:"2026-03-06",f:"CMR"},
+{m:"→ caterina acos",a:39000,d:"out",c:"departamento",dt:"2026-03-06",f:"CC"},
+{m:"→ Nicolas Bolel",a:900000,d:"out",c:"compras_imp",dt:"2026-03-06",f:"CC"},
+{m:"→ joaquin subia",a:11000,d:"out",c:"restaurantes",dt:"2026-03-05",f:"CC"},
+{m:"→ Enrique Ortiz",a:400000,d:"out",c:"departamento",dt:"2026-03-05",f:"CC"},
+{m:"↩ RAPPI",a:630,d:"in",c:"restaurantes",dt:"2026-03-03",f:"CMR"},
+{m:"→ Enrique Ortiz",a:1000000,d:"out",c:"departamento",dt:"2026-03-03",f:"CC"},
+{m:"RAPPI",a:9622,d:"out",c:"restaurantes",dt:"2026-03-02",f:"CMR"},
+{m:"RAPPI",a:3050,d:"out",c:"restaurantes",dt:"2026-03-02",f:"CMR"},
+{m:"RAPPI",a:4000,d:"out",c:"restaurantes",dt:"2026-03-02",f:"CMR"},
+{m:"LOS TRONCOS",a:50000,d:"out",c:"restaurantes",dt:"2026-03-01",f:"CMR"},
+{m:"DULCE MAR SPA",a:1590,d:"out",c:"restaurantes",dt:"2026-03-01",f:"CMR"},
+{m:"TICKETPLUS IM30",a:8000,d:"out",c:"entretenim",dt:"2026-03-01",f:"CMR"},
+{m:"MP *SIMPLEPARK",a:1400,d:"out",c:"transporte",dt:"2026-02-28",f:"CMR"},
+{m:"INVERSIONES SOL CARI",a:1300,d:"out",c:"restaurantes",dt:"2026-02-28",f:"CMR"},
+{m:"TUU*PLAYA FARO",a:2500,d:"out",c:"restaurantes",dt:"2026-02-28",f:"CMR"},
+{m:"MERCADOPAGO *SOCIEDAD",a:20000,d:"out",c:"otras",dt:"2026-02-27",f:"CMR"},
+{m:"← Benjamin Richasse",a:542817,d:"in",c:"ingreso",dt:"2026-02-27",f:"CC"},
+{m:"OTROSPAGOS COM COND",a:338462,d:"out",c:"departamento",dt:"2026-02-26",f:"CMR"},
+{m:"TOTTUS APP",a:25500,d:"out",c:"supermercado",dt:"2026-02-26",f:"CMR"},
+{m:"Remuneraciones",a:2920285,d:"in",c:"ingreso",dt:"2026-02-26",f:"CC"},
+{m:"→ BTG Pactual",a:1500000,d:"out",c:"inversiones",dt:"2026-02-26",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:632817,d:"in",c:"ingreso",dt:"2026-02-25",f:"CC"},
+{m:"MERCADOPAGO *FURO",a:51084,d:"out",c:"restaurantes",dt:"2026-02-24",f:"CMR"},
+{m:"FALABELLA.COM",a:25640,d:"out",c:"compras_imp",dt:"2026-02-23",f:"CMR"},
+{m:"→ Caterine Acos",a:39000,d:"out",c:"departamento",dt:"2026-02-23",f:"CC"},
+{m:"→ maria trinida",a:20000,d:"out",c:"carrete",dt:"2026-02-23",f:"CC"},
+{m:"SHELL EP140 PATAGONIA",a:40000,d:"out",c:"transporte",dt:"2026-02-22",f:"CMR"},
+{m:"JUMBO LOS TRAPENSES",a:56810,d:"out",c:"supermercado",dt:"2026-02-22",f:"CMR"},
+{m:"LOS COLIGUES",a:1990,d:"out",c:"supermercado",dt:"2026-02-21",f:"CMR"},
+{m:"CCU",a:1800,d:"out",c:"restaurantes",dt:"2026-02-20",f:"CMR"},
+{m:"VIDA PARQUE",a:6400,d:"out",c:"entretenim",dt:"2026-02-20",f:"CMR"},
+{m:"MERCADOPAGO *CANTABRI",a:14460,d:"out",c:"restaurantes",dt:"2026-02-20",f:"CMR"},
+{m:"LA VICENTINA",a:14080,d:"out",c:"restaurantes",dt:"2026-02-20",f:"CMR"},
+{m:"CCU",a:1200,d:"out",c:"restaurantes",dt:"2026-02-20",f:"CMR"},
+{m:"Remuneraciones",a:7578404,d:"in",c:"ingreso",dt:"2026-02-20",f:"CC"},
+{m:"→ BTG Pactual",a:6000000,d:"out",c:"inversiones",dt:"2026-02-20",f:"CC"},
+{m:"FORK NUEVA LAS CONDES",a:6743,d:"out",c:"restaurantes",dt:"2026-02-19",f:"CMR"},
+{m:"TRAVEL TIENDA M",a:364780,d:"out",c:"entretenim",dt:"2026-02-18",f:"CMR"},
+{m:"THFIT PLAYA",a:28000,d:"out",c:"salud_deporte",dt:"2026-02-18",f:"CMR"},
+{m:"FALABELLA",a:209990,d:"out",c:"compras_imp",dt:"2026-02-18",f:"CMR"},
+{m:"← MARTINA DIUANA",a:210000,d:"in",c:"ingreso",dt:"2026-02-18",f:"CC"},
+{m:"SALCOBRAND 559",a:9696,d:"out",c:"salud_deporte",dt:"2026-02-17",f:"CMR"},
+{m:"→ khipu CLBS C",a:18742,d:"out",c:"otras",dt:"2026-02-17",f:"CC"},
+{m:"PAGO SERVIPAG",a:34085,d:"out",c:"departamento",dt:"2026-02-17",f:"CC"},
+{m:"FLOW *FINISHER.CL",a:16181,d:"out",c:"salud_deporte",dt:"2026-02-16",f:"CMR"},
+{m:"→ Romero Martin",a:35000,d:"out",c:"salud_deporte",dt:"2026-02-16",f:"CC"},
+{m:"→ jose anton",a:10000,d:"out",c:"otras",dt:"2026-02-16",f:"CC"},
+{m:"MP *CARVUK",a:17990,d:"out",c:"transporte",dt:"2026-02-15",f:"CMR"},
+{m:"MP *SIMPLEPARK",a:800,d:"out",c:"transporte",dt:"2026-02-15",f:"CMR"},
+{m:"TICKETPLUS IM30",a:16000,d:"out",c:"entretenim",dt:"2026-02-15",f:"CMR"},
+{m:"TOTTUS APP",a:71674,d:"out",c:"supermercado",dt:"2026-02-15",f:"CMR"},
+{m:"↩ TOTTUS APP",a:5594,d:"in",c:"supermercado",dt:"2026-02-15",f:"CMR"},
+{m:"MERCADOPAGO *JORGEHUG",a:1800,d:"out",c:"restaurantes",dt:"2026-02-14",f:"CMR"},
+{m:"↩ MERPAGO*SIMPLEPARK",a:50,d:"in",c:"transporte",dt:"2026-02-14",f:"CMR"},
+{m:"JUMBO MAITENCILLO",a:3790,d:"out",c:"supermercado",dt:"2026-02-14",f:"CMR"},
+{m:"MERPAGO*SIMPLEPARK",a:1600,d:"out",c:"transporte",dt:"2026-02-14",f:"CMR"},
+{m:"MERPAGO*SIMPLEPARK",a:50,d:"out",c:"transporte",dt:"2026-02-14",f:"CMR"},
+{m:"MUEVO COPEC",a:40000,d:"out",c:"transporte",dt:"2026-02-13",f:"CMR"},
+{m:"CAFE AYEN",a:23200,d:"out",c:"restaurantes",dt:"2026-02-13",f:"CMR"},
+{m:"GUACAMOLE PRESIDENTE R",a:6900,d:"out",c:"restaurantes",dt:"2026-02-13",f:"CMR"},
+{m:"FORK NUEVA LAS CONDES",a:2303,d:"out",c:"restaurantes",dt:"2026-02-12",f:"CMR"},
+{m:"SB 794",a:16040,d:"out",c:"restaurantes",dt:"2026-02-11",f:"CMR"},
+{m:"MP *GOLDPLANSPA",a:37373,d:"out",c:"salud_deporte",dt:"2026-02-09",f:"CMR"},
+{m:"RedGloba*CARNICERIA Y",a:33230,d:"out",c:"supermercado",dt:"2026-02-07",f:"CMR"},
+{m:"GUACAMOLE PRESIDENTE R",a:6900,d:"out",c:"restaurantes",dt:"2026-02-06",f:"CMR"},
+{m:"← Nicolas Pumpin",a:88000,d:"in",c:"ingreso",dt:"2026-02-06",f:"CC"},
+{m:"MERCADOPAGO *MITBURGE",a:112013,d:"out",c:"restaurantes",dt:"2026-02-04",f:"CMR"},
+{m:"MP *CARVUK",a:173742,d:"out",c:"transporte",dt:"2026-02-04",f:"CMR"},
+{m:"← RODRIGO CORREA",a:14300,d:"in",c:"ingreso",dt:"2026-02-04",f:"CC"},
+{m:"→ BTG Pactual",a:500000,d:"out",c:"inversiones",dt:"2026-02-03",f:"CC"},
+{m:"FORK NUEVA LAS CONDES",a:7336,d:"out",c:"restaurantes",dt:"2026-02-02",f:"CMR"},
+{m:"TOTTUS APP",a:76075,d:"out",c:"supermercado",dt:"2026-02-02",f:"CMR"},
+{m:"↩ TOTTUS APP",a:2464,d:"in",c:"supermercado",dt:"2026-02-02",f:"CMR"},
+{m:"← Benjamin Richasse",a:546285,d:"in",c:"ingreso",dt:"2026-02-02",f:"CC"},
+{m:"→ Mauricio gome",a:3000,d:"out",c:"otras",dt:"2026-02-02",f:"CC"},
+{m:"SUMUP * EL ROQUIN",a:2000,d:"out",c:"restaurantes",dt:"2026-02-01",f:"CMR"},
+{m:"MASSALUD LICAN",a:1950,d:"out",c:"salud_deporte",dt:"2026-01-30",f:"CMR"},
+{m:"OTROSPAGOS COM COND",a:348866,d:"out",c:"departamento",dt:"2026-01-29",f:"CMR"},
+{m:"Remuneraciones",a:3141249,d:"in",c:"ingreso",dt:"2026-01-29",f:"CC"},
+{m:"→ BTG Pactual",a:1300000,d:"out",c:"inversiones",dt:"2026-01-29",f:"CC"},
+{m:"→ francisco nav",a:14418,d:"out",c:"carrete",dt:"2026-01-27",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:520000,d:"in",c:"ingreso",dt:"2026-01-23",f:"CC"},
+{m:"FORK NUEVA LAS CONDES",a:5993,d:"out",c:"restaurantes",dt:"2026-01-22",f:"CMR"},
+{m:"NOTARIA MANRIQUEZ",a:220000,d:"out",c:"inversiones",dt:"2026-01-22",f:"CMR"},
+{m:"FALABELLA.COM",a:41982,d:"out",c:"compras_imp",dt:"2026-01-21",f:"CMR"},
+{m:"← Francisco Javier Garci",a:100010,d:"in",c:"ingreso",dt:"2026-01-20",f:"CC"},
+{m:"OKM NUEVA LAS CONDES",a:1290,d:"out",c:"supermercado",dt:"2026-01-19",f:"CMR"},
+{m:"VENTIPAYCOM",a:73760,d:"out",c:"carrete",dt:"2026-01-19",f:"CMR"},
+{m:"PRONTO LOS TRAPENSES",a:3690,d:"out",c:"transporte",dt:"2026-01-18",f:"CMR"},
+{m:"MP *CHARGEFIXSPA",a:2250,d:"out",c:"carrete",dt:"2026-01-17",f:"CMR"},
+{m:"MP *CHARGEFIXSPA",a:3000,d:"out",c:"carrete",dt:"2026-01-17",f:"CMR"},
+{m:"MERCADOPAGO *COMEDYRE",a:61050,d:"out",c:"entretenim",dt:"2026-01-17",f:"CMR"},
+{m:"MERCADOPAGO *JETSET",a:85305,d:"out",c:"entretenim",dt:"2026-01-17",f:"CMR"},
+{m:"ROYAL BAR PROVIDENCIA",a:87868,d:"out",c:"carrete",dt:"2026-01-17",f:"CMR"},
+{m:"VITACURA-748",a:23606,d:"out",c:"restaurantes",dt:"2026-01-17",f:"CMR"},
+{m:"GASTRONOMIA ITALIA SPA",a:31845,d:"out",c:"restaurantes",dt:"2026-01-17",f:"CMR"},
+{m:"HAULMER*COMEDYPASS",a:36000,d:"out",c:"entretenim",dt:"2026-01-17",f:"CMR"},
+{m:"GELATERIA FIRENZE",a:13400,d:"out",c:"restaurantes",dt:"2026-01-17",f:"CMR"},
+{m:"GALPON ITALIA",a:48719,d:"out",c:"carrete",dt:"2026-01-17",f:"CMR"},
+{m:"GUACAMOLE PRESIDENTE R",a:12000,d:"out",c:"restaurantes",dt:"2026-01-16",f:"CMR"},
+{m:"OKM NUEVA LAS CONDES",a:2580,d:"out",c:"supermercado",dt:"2026-01-16",f:"CMR"},
+{m:"→ Caterine Acos",a:39000,d:"out",c:"departamento",dt:"2026-01-16",f:"CC"},
+{m:"FALABELLA.COM",a:2930,d:"out",c:"compras_imp",dt:"2026-01-15",f:"CMR"},
+{m:"→ Romero Martin",a:35000,d:"out",c:"salud_deporte",dt:"2026-01-15",f:"CC"},
+{m:"→ khipu CLBS C",a:18742,d:"out",c:"otras",dt:"2026-01-14",f:"CC"},
+{m:"← FRANCISCO JOSE RENCORET",a:250000,d:"in",c:"ingreso",dt:"2026-01-05",f:"CC"},
+{m:"→ Agustin Santa",a:46053,d:"out",c:"entretenim",dt:"2026-01-05",f:"CC"},
+{m:"← Benjamin Richasse",a:200000,d:"in",c:"ingreso",dt:"2026-01-02",f:"CC"},
+{m:"← Florencia Almendra Piz",a:15190,d:"in",c:"ingreso",dt:"2026-01-02",f:"CC"},
+{m:"CARGO INTERES LC",a:5,d:"out",c:"otras",dt:"2026-01-02",f:"CC"},
+{m:"IMPUESTO DL 3475",a:1,d:"out",c:"otras",dt:"2026-01-02",f:"CC"}
 ];
 
-const TXS = [
-  {id:'1', merchant:'Empresa S.A.',       amount:1200000, type:'sueldo',   dir:'in',  cat:'sueldo',       src:'income',  split:null,  daysAgo:0},
-  {id:'2', merchant:'Carlos Ramos',       amount:16000,  type:'devolucion',dir:'in',  cat:'devolucion',   src:'income',  split:null,  daysAgo:1},
-  {id:'3', merchant:'Jumbo Las Condes',   amount:87500,  type:'compra',    dir:'out', cat:'supermercado', src:'local',   split:null,  daysAgo:2},
-  {id:'4', merchant:'Uber',               amount:4200,   type:'compra',    dir:'out', cat:'transporte',   src:'local',   split:null,  daysAgo:2},
-  {id:'5', merchant:'Starbucks',          amount:6800,   type:'compra',    dir:'out', cat:'restaurantes', src:'local',   split:null,  daysAgo:3},
-  {id:'6', merchant:'SmartFit',           amount:29900,  type:'compra',    dir:'out', cat:'deporte',      src:'memory',  split:null,  daysAgo:4},
-  {id:'7', merchant:'Jumbo (Asado)',      amount:64000,  type:'compra',    dir:'out', cat:'supermercado', src:'local',   split:{people:4,share:16000,rec:16000,desc:'Asado cumpleaños'}, daysAgo:5},
-  {id:'8', merchant:'Cruz Verde',         amount:14300,  type:'compra',    dir:'out', cat:'salud',        src:'ai',      split:null,  daysAgo:6},
-  {id:'9', merchant:'Comercio Descono.',  amount:22000,  type:'compra',    dir:'out', cat:null,           src:null,      split:null,  daysAgo:6},
-];
+// ── HELPERS ──────────────────────────────────────────────
+const CLP=n=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
+const MONTH_NAMES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const cat=id=>CATS[id]||{icon:'❓',label:id||'Sin cat',color:'#607D8B'};
 
-function formatCLP(n) {
-  return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
-}
-function timeAgo(days) {
-  if(days===0) return 'hoy';
-  if(days===1) return 'ayer';
-  return `hace ${days} días`;
-}
-function getCat(id) { return CATS.find(c=>c.id===id)||null; }
-
-// ── SCREENS ──────────────────────────────────────────────────────
-function renderResumen() {
-  const income   = 1200000 + 16000;
-  const expenses = 87500 + 4200 + 6800 + 29900 + 16000 + 14300;
-  const balance  = income - expenses;
-  const rate     = Math.round((balance/income)*100);
-
-  const catTotals = [
-    {id:'supermercado', icon:'🛒', label:'Supermercado', color:'#66BB6A', total:87500+16000, count:2},
-    {id:'deporte',      icon:'⚽', label:'Deporte',      color:'#81C784', total:29900, count:1},
-    {id:'salud',        icon:'💊', label:'Salud',        color:'#33691E', total:14300, count:1},
-    {id:'restaurantes', icon:'🍽️', label:'Restaurantes', color:'#4CAF50', total:6800,  count:1},
-    {id:'transporte',   icon:'🚌', label:'Transporte',   color:'#1B5E20', total:4200,  count:1},
-  ];
-
-  return `
-    <div class="screen-title">Resumen</div>
-    <div class="screen-sub">Junio 2026</div>
-    <div class="main-card">
-      <div class="main-card-title">Balance del mes</div>
-      <div class="main-balance">${formatCLP(balance)}</div>
-      <div class="sub-cards">
-        <div class="sub-card">
-          <div class="sub-card-label">📥 Ingresos</div>
-          <div class="sub-card-amount">${formatCLP(income)}</div>
-        </div>
-        <div class="sub-card">
-          <div class="sub-card-label">💸 Gastos</div>
-          <div class="sub-card-amount expense">${formatCLP(expenses)}</div>
-        </div>
-      </div>
-      <div class="savings-row">
-        <span class="savings-label">Tasa de ahorro</span>
-        <span class="savings-pct">${rate}%</span>
-      </div>
-      <div class="savings-bar"><div class="savings-fill" style="width:${rate}%"></div></div>
-      <div class="pending-alert">⚠️ 1 gasto sin categorizar</div>
-    </div>
-
-    <div class="section-title">Gastos por categoría</div>
-    ${catTotals.map(c => {
-      const pct = Math.round((c.total/income)*100);
-      return `
-      <div class="cat-row">
-        <div class="cat-row-top">
-          <div class="cat-left">
-            <span class="cat-icon-sm">${c.icon}</span>
-            <div>
-              <div class="cat-name">${c.label}</div>
-              <div class="cat-count">${c.count} movimiento${c.count!==1?'s':''}</div>
-            </div>
-          </div>
-          <div style="text-align:right">
-            <div class="cat-amount">${formatCLP(c.total)}</div>
-            <div class="cat-pct">${pct}% del sueldo</div>
-          </div>
-        </div>
-        <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${Math.min(pct*2,100)}%;background:${c.color}"></div></div>
-      </div>`;
-    }).join('')}
-  `;
-}
-
-function renderHistorial() {
-  const months = [
-    {label:'Junio 2026',  income:1216000, expenses:158700, rate:87, txCount:9,  pending:1, open:true},
-    {label:'Mayo 2026',   income:1225000, expenses:187400, rate:85, txCount:8,  pending:0, open:false},
-    {label:'Abril 2026',  income:1200000, expenses:201000, rate:83, txCount:11, pending:0, open:false},
-  ];
-  return `
-    <div class="screen-title">Historial</div>
-    <div class="screen-sub">3 meses registrados</div>
-    ${months.map((m,i) => `
-    <div class="month-card">
-      <div class="month-header" onclick="toggleMonth(${i})">
-        <div>
-          <div class="month-label">${m.label}</div>
-          <div class="month-meta">${m.txCount} movimientos · ${m.pending>0?`⚠️ ${m.pending} pendiente`:'✓ Todo categorizado'}</div>
-        </div>
-        <div>
-          <div class="month-balance" style="color:${m.income-m.expenses>0?'#4CAF50':'#EF5350'}">${formatCLP(m.income-m.expenses)}</div>
-          <div class="month-chevron" id="chev${i}">${m.open?'▲':'▼'}</div>
-        </div>
-      </div>
-      <div id="mbody${i}" style="display:${m.open?'block':'none'}">
-        <div class="month-body">
-          <div class="summary-row">
-            <div class="summary-item"><div class="summary-label">📥 Ingresos</div><div class="summary-val" style="color:#A5D6A7">${formatCLP(m.income)}</div></div>
-            <div class="summary-divider"></div>
-            <div class="summary-item"><div class="summary-label">💸 Gastos</div><div class="summary-val" style="color:#EF9A9A">${formatCLP(m.expenses)}</div></div>
-            <div class="summary-divider"></div>
-            <div class="summary-item"><div class="summary-label">📈 Ahorro</div><div class="summary-val" style="color:#81C784">${m.rate}%</div></div>
-          </div>
-          <div style="color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:10px">Por categoría</div>
-          ${[
-            {icon:'🛒',label:'Supermercado',color:'#66BB6A',pct:65},
-            {icon:'⚽',label:'Deporte',color:'#81C784',pct:25},
-            {icon:'🍽️',label:'Restaurantes',color:'#4CAF50',pct:18},
-            {icon:'🚌',label:'Transporte',color:'#1B5E20',pct:12},
-          ].map(c=>`
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <span style="font-size:18px">${c.icon}</span>
-            <div style="flex:1">
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="color:#ccc;font-size:12px">${c.label}</span>
-                <span style="color:#fff;font-size:12px;font-weight:600">${c.pct}%</span>
-              </div>
-              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${c.pct}%;background:${c.color}"></div></div>
-            </div>
-          </div>`).join('')}
-        </div>
-      </div>
-    </div>`).join('')}
-  `;
-}
-
-let activeFilter = 'all';
-let activeCat = null;
-
-function renderMovimientos() {
-  const filtered = TXS.filter(t => {
-    if(activeFilter==='out' && t.dir!=='out') return false;
-    if(activeFilter==='in'  && t.dir!=='in')  return false;
-    if(activeCat && t.cat!==activeCat) return false;
-    return true;
+function monthStats(y,mo){
+  const txs=TXS.filter(t=>{const d=new Date(t.dt);return d.getFullYear()===y&&d.getMonth()===mo});
+  const income=txs.filter(t=>t.d==='in').reduce((s,t)=>s+t.a,0);
+  const exp=txs.filter(t=>t.d==='out').reduce((s,t)=>s+t.a,0);
+  const bal=income-exp;
+  const rate=income>0?Math.round((bal/income)*100):0;
+  const catMap={};
+  txs.filter(t=>t.d==='out').forEach(t=>{
+    if(!catMap[t.c])catMap[t.c]={total:0,count:0};
+    catMap[t.c].total+=t.a; catMap[t.c].count++;
   });
-
-  return `
-    <div class="screen-title">Movimientos</div>
-    <div class="filter-scroll">
-      ${['all','out','in'].map(f=>`
-        <div class="filter-chip ${activeFilter===f&&!activeCat?'active':''}" onclick="setFilter('${f}')">${f==='all'?'Todos':f==='out'?'💳 Gastos':'📥 Ingresos'}</div>
-      `).join('')}
-      <div style="width:1px;background:#2A2A2A;margin:4px 0;flex-shrink:0"></div>
-      ${CATS.map(c=>`
-        <div class="filter-chip ${activeCat===c.id?'active':''}" style="${activeCat===c.id?`border-color:${c.color};background:${c.color}20`:''}" onclick="setCatFilter('${c.id}')">${c.icon} ${c.label}</div>
-      `).join('')}
-    </div>
-    <div class="section-header"><span class="section-header-text">Hoy</span><span class="section-header-count">2</span></div>
-    ${filtered.filter(t=>t.daysAgo<=1).map(t=>renderTxItem(t)).join('')}
-    ${filtered.filter(t=>t.daysAgo>=2&&t.daysAgo<=3).length?`
-    <div class="section-header"><span class="section-header-text">Esta semana</span><span class="section-header-count">${filtered.filter(t=>t.daysAgo>=2&&t.daysAgo<=3).length}</span></div>
-    ${filtered.filter(t=>t.daysAgo>=2&&t.daysAgo<=3).map(t=>renderTxItem(t)).join('')}`:''}
-    ${filtered.filter(t=>t.daysAgo>=4).length?`
-    <div class="section-header"><span class="section-header-text">Antes</span><span class="section-header-count">${filtered.filter(t=>t.daysAgo>=4).length}</span></div>
-    ${filtered.filter(t=>t.daysAgo>=4).map(t=>renderTxItem(t)).join('')}`:''}
-  `;
+  const cats=Object.entries(catMap).map(([id,v])=>({id,...v,...cat(id)}))
+    .sort((a,b)=>b.total-a.total).slice(0,6);
+  return{income,exp,bal,rate,txs,cats,txCount:txs.length};
 }
 
-function renderTxItem(t, forceExpand=false) {
-  const cat = getCat(t.cat);
-  const isIn = t.dir==='in';
-  const hasSplit = t.split!==null && t.dir==='out';
-  const displayAmt = hasSplit ? t.split.share : t.amount;
-  const srcIcon = t.src==='memory'?'🧠':t.src==='ai'?'✦ IA':'✓';
-  const isExpanded = forceExpand || expandedTx.has(t.id);
+function dateLabel(dt){
+  const today=new Date('2026-06-17');
+  const d=new Date(dt);
+  const diff=Math.floor((today-d)/86400000);
+  if(diff===0)return'Hoy';
+  if(diff===1)return'Ayer';
+  if(diff<7)return`Hace ${diff} días`;
+  return d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+}
 
-  return `
-  <div class="tx-item ${isIn?'income':''} ${!t.cat&&t.dir==='out'?'pending-tx':''}" onclick="toggleTx('${t.id}')">
+// ── STATE ─────────────────────────────────────────────────
+const tabs={1:'resumen',2:'movimientos'};
+const expandedTx=new Set();
+let activeFilter='all';
+let activeCat=null;
+let activeMonth={y:2026,m:5}; // June = index 5
+let activeMonthView={y:2026,m:5};
+let splitOpen=false;
+let selectedPeople=4;
+let activeModalPhone=null;
+
+// ── RENDER RESUMEN ────────────────────────────────────────
+function renderResumen(){
+  const s=monthStats(activeMonthView.y,activeMonthView.m);
+  const rateColor=s.rate>=20?'#66C870':s.rate>=0?'#FFB74D':'#EF5350';
+
+  let prevM=activeMonthView.m-1,prevY=activeMonthView.y;
+  if(prevM<0){prevM=11;prevY--;}
+  const prev=monthStats(prevY,prevM);
+  const trend=s.bal>prev.bal?'↑':'↓';
+  const trendC=s.bal>prev.bal?'#66C870':'#EF9A9A';
+
+  return`
+  <div class="screen-header">
+    <div><div class="screen-title">Mi resumen</div><div class="screen-sub">${MONTH_NAMES[activeMonthView.m]} ${activeMonthView.y}</div></div>
+    <div class="month-selector" onclick="cycleResumenMonth()">◀ ${MONTH_NAMES[activeMonthView.m].slice(0,3)} ▶</div>
+  </div>
+  <div class="main-card">
+    <div class="card-label">Balance del mes</div>
+    <div class="main-balance ${s.bal<0?'neg':''}">${CLP(s.bal)}</div>
+    <div class="sub-row">
+      <div class="sub-card"><div class="sub-icon">📥</div><div class="sub-label">Ingresos</div><div class="sub-amt">${CLP(s.income)}</div></div>
+      <div class="sub-card"><div class="sub-icon">💸</div><div class="sub-label">Egresos</div><div class="sub-amt neg">${CLP(s.exp)}</div></div>
+    </div>
+    <div class="savings-row"><span class="savings-lbl">Tasa de ahorro</span><span class="savings-pct" style="color:${rateColor}">${s.rate}%</span></div>
+    <div class="sbar"><div class="sbar-fill" style="width:${Math.min(Math.max(s.rate,0),100)}%;background:${rateColor}"></div></div>
+    <div class="savings-row" style="margin-top:6px"><span class="savings-lbl" style="font-size:9px">vs ${MONTH_NAMES[prevM].slice(0,3)}</span><span style="color:${trendC};font-size:10px;font-weight:700">${trend} ${CLP(Math.abs(s.bal-prev.bal))}</span></div>
+    ${s.txs.filter(t=>t.d==='out'&&(!t.c||t.c==='otras')).length>2?`<div class="pending-alert">⚠️ Revisar ${s.txs.filter(t=>t.d==='out'&&t.c==='otras').length} gastos en "Otras"</div>`:''}
+  </div>
+  <div class="sec-hdr"><span class="sec-title">Gastos por categoría</span><span class="sec-count">${s.cats.length} categorías</span></div>
+  ${s.cats.map(c=>{
+    const pct=s.income>0?Math.round((c.total/s.income)*100):0;
+    return`<div class="cat-row" style="border-left-color:${c.color}">
+      <span class="cat-icon-sm">${c.icon}</span>
+      <div class="cat-info">
+        <div class="cat-name">${c.label}</div>
+        <div class="cat-sub">${c.count} mov.</div>
+        <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${Math.min(pct*2,100)}%;background:${c.color}"></div></div>
+      </div>
+      <div class="cat-right"><div class="cat-amt">${CLP(c.total)}</div><div class="cat-pct">${pct}% ing.</div></div>
+    </div>`;
+  }).join('')}`;
+}
+
+let resumenMonthIdx=0;
+const MONTH_LIST=[{y:2026,m:5},{y:2026,m:4},{y:2026,m:3},{y:2026,m:2},{y:2026,m:1},{y:2026,m:0}];
+function cycleResumenMonth(){
+  resumenMonthIdx=(resumenMonthIdx+1)%MONTH_LIST.length;
+  activeMonthView=MONTH_LIST[resumenMonthIdx];
+  render(1);render(2);
+}
+
+// ── RENDER HISTORIAL ─────────────────────────────────────
+const openMonths=new Set([0]);
+function renderHistorial(){
+  const months=[{y:2026,m:5},{y:2026,m:4},{y:2026,m:3},{y:2026,m:2},{y:2026,m:1},{y:2026,m:0}];
+  return`
+  <div class="screen-header"><div><div class="screen-title">Historial</div><div class="screen-sub">6 meses · Ene–Jun 2026</div></div></div>
+  ${months.map((mo,i)=>{
+    const s=monthStats(mo.y,mo.m);
+    const isOpen=openMonths.has(i);
+    const balC=s.bal>=0?'#66C870':'#EF9A9A';
+    return`<div class="month-card">
+      <div class="month-hdr ${s.bal>=0?'pos':'neg'}" onclick="toggleMonth(${i})">
+        <div><div class="month-lbl">${MONTH_NAMES[mo.m]} ${mo.y}</div><div class="month-meta">${s.txCount} movimientos</div></div>
+        <div class="month-right"><div class="month-bal" style="color:${balC}">${s.bal>=0?'+':''}${CLP(s.bal)}</div><div class="month-chev" id="mc${i}">${isOpen?'▲':'▼'}</div></div>
+      </div>
+      <div id="mb${i}" style="display:${isOpen?'block':'none'}">
+        <div class="month-body">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-lbl">📥 Ingresos</div><div class="stat-val" style="color:#66C870">${CLP(s.income)}</div></div>
+            <div class="stat-card"><div class="stat-lbl">💸 Egresos</div><div class="stat-val" style="color:#EF9A9A">${CLP(s.exp)}</div></div>
+            <div class="stat-card"><div class="stat-lbl">📈 Ahorro</div><div class="stat-val" style="color:${s.rate>=0?'#66C870':'#EF9A9A'}">${s.rate}%</div></div>
+          </div>
+          ${s.cats.slice(0,4).map(c=>{
+            const pct=s.exp>0?Math.round((c.total/s.exp)*100):0;
+            return`<div class="mini-cat"><span class="mini-icon">${c.icon}</span><div class="mini-info"><div class="mini-row"><span class="mini-name">${c.label}</span><span class="mini-amt">${CLP(c.total)}</span></div><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(pct,100)}%;background:${c.color}"></div></div></div></div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+
+function toggleMonth(i){
+  if(openMonths.has(i))openMonths.delete(i);else openMonths.add(i);
+  const b=document.getElementById(`mb${i}`);
+  const c=document.getElementById(`mc${i}`);
+  if(b)b.style.display=openMonths.has(i)?'block':'none';
+  if(c)c.textContent=openMonths.has(i)?'▲':'▼';
+}
+
+// ── RENDER MOVIMIENTOS ───────────────────────────────────
+function renderMovimientos(){
+  let txs=TXS.filter(t=>{
+    const d=new Date(t.dt);
+    return d.getFullYear()===activeMonth.y&&d.getMonth()===activeMonth.m;
+  });
+  if(activeFilter==='out')txs=txs.filter(t=>t.d==='out');
+  if(activeFilter==='in')txs=txs.filter(t=>t.d==='in');
+  if(activeCat)txs=txs.filter(t=>t.c===activeCat);
+
+  // Group by date
+  const groups={};
+  txs.forEach(t=>{if(!groups[t.dt])groups[t.dt]=[];groups[t.dt].push(t);});
+  const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+
+  const MONTHS_OPTS=[{y:2026,m:5},{y:2026,m:4},{y:2026,m:3},{y:2026,m:2},{y:2026,m:1},{y:2026,m:0}];
+
+  return`
+  <div class="screen-header"><div><div class="screen-title">Movimientos</div><div class="screen-sub">${txs.length} registros</div></div>
+    <div class="month-selector" onclick="cycleMovMonth()">◀ ${MONTH_NAMES[activeMonth.m].slice(0,3)} ▶</div>
+  </div>
+  <div class="filter-row">
+    <div class="fchip ${activeFilter==='all'&&!activeCat?'active':''}" onclick="setFilter('all')">Todos</div>
+    <div class="fchip ${activeFilter==='out'&&!activeCat?'active':''}" onclick="setFilter('out')">💳 Gastos</div>
+    <div class="fchip ${activeFilter==='in'&&!activeCat?'active':''}" onclick="setFilter('in')">📥 Ingresos</div>
+    ${Object.entries(CATS).filter(([id])=>id!=='ingreso').map(([id,c])=>`
+      <div class="fchip ${activeCat===id?'active':''}" style="${activeCat===id?`border-color:${c.color};background:${c.color}18`:''}" onclick="setCat('${id}')">${c.icon} ${c.label}</div>
+    `).join('')}
+  </div>
+  ${dates.length===0?`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Sin movimientos</div><div class="empty-sub">Prueba otro filtro.</div></div>`:''}
+  ${dates.map(dt=>`
+    <div class="date-sep"><span>${dateLabel(dt)}</span><span class="date-sep-count">${groups[dt].length}</span></div>
+    ${groups[dt].map(t=>renderTx(t)).join('')}
+  `).join('')}`;
+}
+
+let movMonthIdx=0;
+function cycleMovMonth(){
+  const opts=[{y:2026,m:5},{y:2026,m:4},{y:2026,m:3},{y:2026,m:2},{y:2026,m:1},{y:2026,m:0}];
+  movMonthIdx=(movMonthIdx+1)%opts.length;
+  activeMonth=opts[movMonthIdx];
+  activeFilter='all';activeCat=null;
+  render(1);render(2);
+}
+
+function renderTx(t,forceOpen=false){
+  const c=cat(t.c);
+  const isIn=t.d==='in';
+  const isExp=expandedTx.has(t.m+t.dt)||forceOpen;
+  const srcIcon=t.src==='memory'?'🧠 Memoria':t.src==='ai'?'✦ IA':'✓';
+
+  return`<div class="tx-item ${isIn?'income':''}" style="border-left-color:${c.color}55" onclick="toggleTx('${t.m}${t.dt}')">
     <div class="tx-row">
-      <div class="tx-icon-wrap" style="border-color:${isIn?'#4CAF5066':cat?cat.color+'55':'#FF8F0055'};background:${isIn?'#4CAF5018':cat?cat.color+'18':'#FF8F0018'}">
-        ${isIn?'📥':cat?cat.icon:'❓'}
-      </div>
+      <div class="tx-icon-wrap" style="border-color:${isIn?'#00A65166':c.color+'55'};background:${isIn?'#00A65115':c.color+'18'}">${isIn?'📥':c.icon}</div>
       <div class="tx-info">
-        <div class="tx-merchant">${t.merchant}</div>
-        <div class="tx-meta">${isIn?'📥 Ingreso':t.type==='compra'?'💳 Compra':'📄 Pago'} · ${timeAgo(t.daysAgo)}${hasSplit?' · 👥 Dividido':''}</div>
+        <div class="tx-merchant">${t.m}</div>
+        <div class="tx-meta">
+          <span class="fuente-tag ${t.f==='CMR'?'cmr':''}">${t.f==='CMR'?'💳 CMR':'🏦 CC'}</span>
+          <span>${isIn?c.label:t.c?c.label:'Sin categoría'}</span>
+        </div>
       </div>
-      <div class="tx-amount-wrap">
-        <div class="tx-amount ${isIn?'in':'out'}">${isIn?'+':'-'}${formatCLP(displayAmt)}</div>
-        ${hasSplit?`<div style="color:#558B2F;font-size:10px;margin-top:1px">de ${formatCLP(t.amount)}</div>`:''}
-        ${!isIn&&!t.cat?`<div class="tx-badge pending">● PENDIENTE</div>`:
-          !isIn&&t.cat?`<div class="tx-badge ok">${srcIcon}</div>`:''}
+      <div class="tx-right">
+        <div class="tx-amt ${isIn?'in':'out'}">${isIn?'+':'-'}${CLP(t.a)}</div>
+        ${!isIn&&t.c?`<div class="tx-badge ok">${c.icon}</div>`:''}
       </div>
     </div>
-    ${isExpanded&&!isIn?`
-    <div class="tx-expanded">
-      ${hasSplit?`
-      <div class="split-card">
-        <div class="split-title">👥 ${t.split.desc}</div>
-        <div class="split-detail">Total pagado: ${formatCLP(t.amount)} ÷ ${t.split.people} personas</div>
-        <div class="split-detail">Tu parte: ${formatCLP(t.split.share)}</div>
-        <div class="split-recovered">Recuperado de amigos: ${formatCLP(t.split.rec)}</div>
-      </div>`:''}
-      ${!t.cat?`
-      <div class="cat-label-sm">Selecciona una categoría:</div>
-      <div class="cat-grid">
-        ${CATS.map(c=>`<div class="cat-chip" style="border-color:${c.color}55;background:${c.color}15" onclick="categorizeTx(event,'${t.id}','${c.id}')">${c.icon} ${c.label}</div>`).join('')}
-      </div>`:
-      `<div style="color:#aaa;font-size:12px">Categoría: ${cat?cat.icon+' '+cat.label:''}</div>`}
+    ${isExp&&!isIn?`<div class="tx-expanded">
+      <div style="color:#4a6a4a;font-size:9px;margin-bottom:4px">Cambiar categoría:</div>
+      <div class="cat-grid">${Object.entries(CATS).filter(([id])=>id!=='ingreso').map(([id,c])=>`
+        <div class="cat-chip" style="border-color:${c.color}55;background:${c.color}15" onclick="catTx(event,'${t.m+t.dt}','${id}')">${c.icon} ${c.label}</div>
+      `).join('')}</div>
     </div>`:''}
   </div>`;
 }
 
-function renderPendientes() {
-  const pending = TXS.filter(t=>t.dir==='out'&&!t.cat);
-  if(pending.length===0) return `
-    <div class="screen-title">Pendientes</div>
-    <div class="empty-state">
-      <div class="empty-icon">✅</div>
-      <div class="empty-title">¡Todo al día!</div>
-      <div class="empty-sub">No hay gastos pendientes de categorizar.</div>
-    </div>`;
-  return `
-    <div class="screen-title">Pendientes</div>
-    <div class="pending-banner">
-      <div class="pending-banner-icon">⚠️</div>
-      <div>
-        <div class="pending-banner-title">${pending.length} gasto sin categorizar</div>
-        <div class="pending-banner-sub">Toca para asignarle una categoría.</div>
-      </div>
-    </div>
-    ${pending.map(t=>renderTxItem(t,true)).join('')}
-  `;
+// ── RENDER PENDIENTES ────────────────────────────────────
+function renderPendientes(){
+  const pend=TXS.filter(t=>t.d==='out'&&t.c==='otras');
+  if(!pend.length)return`<div class="screen-header"><div class="screen-title">Pendientes</div></div><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">¡Todo al día!</div><div class="empty-sub">No hay gastos pendientes de categorizar.</div></div>`;
+  return`
+  <div class="screen-header"><div><div class="screen-title">Pendientes</div><div class="screen-sub">${pend.length} sin categorizar</div></div></div>
+  <div class="pend-banner"><div class="pend-icon">⏳</div><div><div class="pend-title">${pend.length} gastos en "Otras"</div><div class="pend-sub">Toca para asignar categoría.</div></div></div>
+  ${pend.map(t=>renderTx(t,true)).join('')}`;
 }
 
-function renderAjustes() {
-  return `
-    <div class="screen-title">Ajustes</div>
-    <div class="settings-section">
-      <div class="settings-title">🤖 API Key de Anthropic</div>
-      <div class="settings-desc">Se usa para categorizar automáticamente los comercios no conocidos con Claude AI.</div>
-      <div class="key-row">
-        <input class="key-input" type="password" placeholder="sk-ant-api03-..." value="sk-ant-api03-●●●●●●●●●●●●●●●●"/>
-        <button class="show-btn">Ver</button>
-      </div>
-      <button class="settings-btn primary">Guardar API Key</button>
-      <a class="settings-link" href="#">Obtener key en console.anthropic.com →</a>
+// ── RENDER AJUSTES ───────────────────────────────────────
+function renderAjustes(){
+  const memSample=[
+    {m:'lider.cl',c:'🛒 Supermercado'},{m:'candelaria',c:'🎉 Carrete'},
+    {m:'uber',c:'🚗 Transporte'},{m:'fork nueva las condes',c:'🍽️ Restaurantes'},
+    {m:'wellhub cl',c:'💪 Salud/Deporte'},{m:'copec zervo',c:'🚗 Transporte'},
+  ];
+  return`
+  <div class="screen-header"><div class="screen-title">Ajustes</div></div>
+  <div class="set-sec" style="border-left-color:#00A651">
+    <div class="set-title">🤖 API Key de Anthropic</div>
+    <div class="set-desc">Permite categorizar automáticamente comercios nuevos con Claude AI (Haiku).</div>
+    <div class="key-row">
+      <input class="key-inp" type="password" placeholder="sk-ant-api03-..." value="sk-ant-api03-●●●●●●●●●●●●"/>
+      <button class="show-btn">Ver</button>
     </div>
-    <div class="settings-section">
-      <div class="settings-title">🔔 Notificaciones Android</div>
-      <div class="perm-row">
-        <div class="perm-dot green"></div>
-        <span class="perm-text">Acceso a notificaciones activo ✓</span>
-      </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-title">🧠 Comercios recordados</div>
-      <div class="settings-desc">6 comercios recordados.</div>
-      ${[
-        {m:'jumbo las condes', cat:'🛒 Supermercado'},
-        {m:'smartfit',         cat:'⚽ Deporte'},
-        {m:'uber',             cat:'🚌 Transporte'},
-        {m:'starbucks',        cat:'🍽️ Restaurantes'},
-        {m:'cruz verde',       cat:'💊 Salud'},
-        {m:'empresa s.a.',     cat:'💼 Sueldo'},
-      ].map(e=>`
-      <div class="memory-row">
-        <div>
-          <div class="memory-merchant">${e.m}</div>
-          <div class="memory-cat">${e.cat}</div>
-        </div>
-        <span class="memory-del">✕</span>
-      </div>`).join('')}
-    </div>
-    <div class="settings-section">
-      <div class="settings-title">🗃️ Datos</div>
-      <button class="settings-btn danger">Limpiar todos los datos</button>
-    </div>
-  `;
-}
-
-// ── MODAL RENDER ─────────────────────────────────────────────────
-function renderModal() {
-  return `
-  <div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <span class="modal-title" id="modal-title">Nuevo movimiento</span>
-        <span class="modal-close" onclick="closeModal()">✕</span>
-      </div>
-      <div id="modal-body">
-        <div class="dir-btns">
-          <div class="dir-btn" onclick="showExpenseForm()">
-            <div class="dir-btn-icon">💳</div>
-            <div class="dir-btn-label">Gasto</div>
-            <div class="dir-btn-sub">Compras, pagos, transferencias</div>
-          </div>
-          <div class="dir-btn income-btn" onclick="showIncomeForm()">
-            <div class="dir-btn-icon">📥</div>
-            <div class="dir-btn-label">Ingreso</div>
-            <div class="dir-btn-sub">Sueldo, devoluciones, cobros</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <button class="set-btn primary">Guardar API Key</button>
+  </div>
+  <div class="set-sec" style="border-left-color:#00A651">
+    <div class="set-title">🔔 Notificaciones Android</div>
+    <div class="perm-row"><div class="perm-dot ok"></div><span class="perm-txt">Acceso a notificaciones activo ✓</span></div>
+    <button class="set-btn primary">Activar acceso</button>
+  </div>
+  <div class="set-sec">
+    <div class="set-title">🧠 Comercios recordados</div>
+    <div class="set-desc">${memSample.length} comercios categorizados automáticamente.</div>
+    ${memSample.map(e=>`<div class="mem-row"><div><div class="mem-name">${e.m}</div><div class="mem-cat">${e.c}</div></div><span class="mem-del">✕</span></div>`).join('')}
+  </div>
+  <div class="set-sec" style="border-left-color:#4a1010">
+    <div class="set-title">🗃️ Datos</div>
+    <div class="set-desc">Total: ${TXS.length} movimientos registrados.</div>
+    <button class="set-btn danger">Limpiar todos los datos</button>
   </div>`;
 }
 
-function renderExpenseForm() {
-  return `
-    <div class="field-label">Pegar texto de notificación (opcional)</div>
-    <textarea class="field-input" rows="2" placeholder="Compra aprobada en JUMBO por $23.500..." style="resize:none;width:100%;font-family:inherit;line-height:1.5" oninput="parseNotifDemo(this.value)"></textarea>
-
-    <div class="field-label">Comercio *</div>
-    <input class="field-input" id="demo-merchant" type="text" placeholder="Ej: Jumbo Las Condes"/>
-
-    <div class="field-label">Monto (CLP) *</div>
-    <input class="field-input" id="demo-amount" type="number" placeholder="23500" oninput="updateAmtPreview(this.value)"/>
-    <div class="amount-preview" id="amt-preview"></div>
-
-    <div class="split-toggle" id="split-toggle" onclick="toggleSplit()">👥 Gasto compartido ▼</div>
-    <div id="split-section" style="display:none;background:#1E1E1E;border-radius:12px;padding:14px;margin-top:8px;border:1px solid #2A2A2A">
-      <div class="field-label">¿Entre cuántos se divide?</div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        ${[2,3,4,5,6].map(n=>`<div onclick="setPeople(${n})" id="ppl${n}" style="width:40px;height:40px;border-radius:10px;background:#252525;border:1px solid #333;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#aaa;font-weight:600;font-size:14px;${n===4?'background:#2E7D32;border-color:#4CAF50;color:#fff':''}">${n}</div>`).join('')}
+// ── MODAL ────────────────────────────────────────────────
+function renderModal(){return`<div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr"><span class="modal-title" id="modal-title">Nuevo movimiento</span><span class="modal-close" onclick="closeModal()">✕</span></div>
+    <div id="modal-body">
+      <div class="dir-btns">
+        <div class="dir-btn" onclick="showExpForm()"><div class="dir-btn-icon">💳</div><div class="dir-btn-lbl">Gasto</div><div class="dir-btn-sub">Compras, pagos, transferencias</div></div>
+        <div class="dir-btn income-btn" onclick="showIncForm()"><div class="dir-btn-icon">📥</div><div class="dir-btn-lbl">Ingreso</div><div class="dir-btn-sub">Sueldo, devoluciones, cobros</div></div>
       </div>
-      <div class="field-label" style="margin-top:10px">Descripción</div>
-      <input class="field-input" type="text" placeholder="Ej: Asado cumpleaños"/>
-      <div style="background:#2E7D3222;border-radius:8px;padding:10px;margin-top:10px;border:1px solid #2E7D3244;text-align:center;color:#81C784;font-size:13px;font-weight:600" id="split-preview">Tu parte: ${formatCLP(0)}</div>
     </div>
+  </div>
+</div>`;}
 
-    <button class="add-submit" onclick="fakeAdd()">Agregar gasto</button>
-  `;
+function showExpForm(){
+  document.getElementById('modal-title').textContent='💳 Agregar gasto';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="field-lbl">Comercio *</div>
+    <input class="field-inp" id="dm" type="text" placeholder="Ej: Jumbo Las Condes"/>
+    <div class="field-lbl">Monto (CLP) *</div>
+    <input class="field-inp" id="da" type="number" placeholder="23500" oninput="updatePrev(this.value)"/>
+    <div class="amt-preview" id="ap"></div>
+    <div class="split-toggle" id="st" onclick="toggleSplit()">👥 Gasto compartido ▼</div>
+    <div id="ss" style="display:none;background:#0c160c;border-radius:10px;padding:12px;margin-top:7px;border:1px solid #1a2a1a">
+      <div class="field-lbl">¿Entre cuántos?</div>
+      <div style="display:flex;gap:6px;margin-top:3px">
+        ${[2,3,4,5,6].map(n=>`<div onclick="setPpl(${n})" id="pp${n}" style="width:36px;height:36px;border-radius:8px;background:${n===4?'#005a2a':'#1a2a1a'};border:1px solid ${n===4?'#00A651':'#2a3a2a'};display:flex;align-items:center;justify-content:center;cursor:pointer;color:${n===4?'#fff':'#4a6a4a'};font-weight:700;font-size:13px">${n}</div>`).join('')}
+      </div>
+      <div style="background:#005a2a22;border-radius:7px;padding:8px;margin-top:8px;text-align:center;color:#66C870;font-size:12px;font-weight:600" id="sp">Tu parte: ${CLP(0)}</div>
+    </div>
+    <button class="add-submit" onclick="fakeAdd()">Agregar gasto</button>`;
 }
 
-function renderIncomeForm() {
-  return `
-    <div class="field-label">Origen / Comercio *</div>
-    <input class="field-input" type="text" placeholder="Ej: Empresa S.A."/>
-    <div class="field-label">Monto (CLP) *</div>
-    <input class="field-input" type="number" placeholder="1200000" oninput="updateAmtPreview(this.value)"/>
-    <div class="amount-preview" id="amt-preview"></div>
-    <div class="field-label">Tipo de ingreso</div>
+function showIncForm(){
+  document.getElementById('modal-title').textContent='📥 Agregar ingreso';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="field-lbl">Origen *</div>
+    <input class="field-inp" type="text" placeholder="Ej: Empresa S.A."/>
+    <div class="field-lbl">Monto (CLP) *</div>
+    <input class="field-inp" type="number" placeholder="1200000" oninput="updatePrev(this.value)"/>
+    <div class="amt-preview" id="ap"></div>
+    <div class="field-lbl">Tipo</div>
     <div class="income-type-grid">
-      ${[{id:'sueldo',icon:'💼',label:'Sueldo'},{id:'devolucion',icon:'🔄',label:'Devolución / Cobro'},{id:'transferencia_in',icon:'📥',label:'Transferencia recibida'},{id:'otros_ingresos',icon:'💰',label:'Otros ingresos'}].map((it,i)=>`
-      <div class="income-type-btn ${i===0?'active':''}" onclick="selectIncomeType(this)">
-        <span class="income-type-icon">${it.icon}</span>
-        <span class="income-type-label">${it.label}</span>
-      </div>`).join('')}
+      ${[{id:'sueldo',icon:'💼',lbl:'Sueldo'},{id:'dev',icon:'🔄',lbl:'Devolución'},{id:'trans',icon:'📥',lbl:'Transferencia'},{id:'otros',icon:'💰',lbl:'Otros'}].map((it,i)=>`
+        <div class="itype-btn ${i===0?'active':''}" onclick="selInc(this)">
+          <span class="itype-icon">${it.icon}</span>
+          <span class="itype-lbl">${it.lbl}</span>
+        </div>`).join('')}
     </div>
-    <button class="add-submit" style="background:#1B5E20" onclick="fakeAdd()">Agregar ingreso</button>
-  `;
+    <button class="add-submit" style="background:linear-gradient(135deg,#004d20,#007a38)" onclick="fakeAdd()">Agregar ingreso</button>`;
 }
 
-// ── STATE ─────────────────────────────────────────────────────────
-const tabs = {1:'resumen', 2:'movimientos'};
-const expandedTx = new Set();
-let splitOpen = false;
-let selectedPeople = 4;
-let activeModalPhone = null;
-
-function render(phoneId) {
-  const tab = tabs[phoneId];
-  const el  = document.getElementById(`content${phoneId}`);
-  if(tab==='resumen')      el.innerHTML = renderResumen();
-  else if(tab==='historial')    el.innerHTML = renderHistorial();
-  else if(tab==='movimientos')  el.innerHTML = renderMovimientos();
-  else if(tab==='pendientes')   el.innerHTML = renderPendientes();
-  else if(tab==='ajustes')      el.innerHTML = renderAjustes();
+// ── INTERACTIONS ─────────────────────────────────────────
+function render(id){
+  const tab=tabs[id];
+  const el=document.getElementById('content'+id);
+  if(tab==='resumen')el.innerHTML=renderResumen();
+  else if(tab==='historial')el.innerHTML=renderHistorial();
+  else if(tab==='movimientos')el.innerHTML=renderMovimientos();
+  else if(tab==='pendientes')el.innerHTML=renderPendientes();
+  else if(tab==='ajustes')el.innerHTML=renderAjustes();
 }
 
-function switchTab(phoneId, tab) {
-  tabs[phoneId] = tab;
-  activeFilter = 'all'; activeCat = null;
-  const bar = document.querySelector(`#phone${phoneId} .tab-bar`);
-  bar.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-  const tabMap = {resumen:0, historial:1, movimientos:3, pendientes:4, ajustes:5};
-  if(tabMap[tab]!==undefined) bar.querySelectorAll('.tab-item')[tabMap[tab]]?.classList.add('active');
-  render(phoneId);
+function switchTab(pid,tab){
+  tabs[pid]=tab;
+  const bar=document.querySelector(`#phone${pid} .tab-bar`);
+  bar.querySelectorAll('.tab-item').forEach(e=>e.classList.remove('active'));
+  const idx={resumen:0,historial:1,movimientos:3,pendientes:4,ajustes:5};
+  if(idx[tab]!==undefined)bar.querySelectorAll('.tab-item')[idx[tab]]?.classList.add('active');
+  render(pid);
 }
 
-function toggleTx(id) {
-  if(expandedTx.has(id)) expandedTx.delete(id); else expandedTx.add(id);
-  render(1); render(2);
+function toggleTx(key){
+  if(expandedTx.has(key))expandedTx.delete(key);else expandedTx.add(key);
+  render(1);render(2);
 }
 
-function categorizeTx(e, txId, catId) {
+function catTx(e,key,catId){
   e.stopPropagation();
-  const tx = TXS.find(t=>t.id===txId);
-  if(tx) { tx.cat = catId; tx.src = 'manual'; }
-  expandedTx.delete(txId);
-  showToast(1, '✓ Categorizado', `${tx.merchant} → ${getCat(catId)?.label}`);
-  render(1); render(2);
+  expandedTx.delete(key);
+  showToast(1,'✓ Categorizado',`${cat(catId).icon} → ${cat(catId).label}`);
+  render(1);render(2);
 }
 
-function setFilter(f) { activeFilter=f; activeCat=null; render(1); render(2); }
-function setCatFilter(id) { activeCat = activeCat===id?null:id; activeFilter='all'; render(1); render(2); }
+function setFilter(f){activeFilter=f;activeCat=null;render(1);render(2);}
+function setCat(id){activeCat=activeCat===id?null:id;activeFilter='all';render(1);render(2);}
 
-function toggleMonth(i) {
-  const body  = document.getElementById(`mbody${i}`);
-  const chev  = document.getElementById(`chev${i}`);
-  const open  = body.style.display==='block';
-  body.style.display = open?'none':'block';
-  chev.textContent   = open?'▼':'▲';
+function openModal(pid){
+  activeModalPhone=pid;
+  document.getElementById('modal')?.remove();
+  const d=document.createElement('div');
+  d.innerHTML=renderModal();
+  document.getElementById('phone'+pid).appendChild(d.firstElementChild);
+}
+function closeModal(){document.getElementById('modal')?.remove();activeModalPhone=null;}
+
+function toggleSplit(){
+  splitOpen=!splitOpen;
+  document.getElementById('ss').style.display=splitOpen?'block':'none';
+  document.getElementById('st').textContent=`👥 Gasto compartido ${splitOpen?'▲':'▼'}`;
+  document.getElementById('st').classList.toggle('active',splitOpen);
 }
 
-function openModal(phoneId) {
-  activeModalPhone = phoneId;
-  const phone = document.getElementById(`phone${phoneId}`);
-  const existing = document.getElementById('modal');
-  if(existing) existing.remove();
-  const div = document.createElement('div');
-  div.innerHTML = renderModal();
-  phone.appendChild(div.firstElementChild);
-}
-
-function closeModal() {
-  const m = document.getElementById('modal');
-  if(m) m.remove();
-  activeModalPhone = null;
-}
-
-function handleModalClick(e) { if(e.target.id==='modal') closeModal(); }
-
-function showExpenseForm() {
-  document.getElementById('modal-title').textContent = '💳 Agregar gasto';
-  document.getElementById('modal-body').innerHTML = renderExpenseForm();
-  splitOpen = false;
-}
-
-function showIncomeForm() {
-  document.getElementById('modal-title').textContent = '📥 Agregar ingreso';
-  document.getElementById('modal-body').innerHTML = renderIncomeForm();
-}
-
-function toggleSplit() {
-  splitOpen = !splitOpen;
-  document.getElementById('split-section').style.display = splitOpen?'block':'none';
-  document.getElementById('split-toggle').textContent = `👥 Gasto compartido ${splitOpen?'▲':'▼'}`;
-  document.getElementById('split-toggle').classList.toggle('active', splitOpen);
-}
-
-function setPeople(n) {
-  selectedPeople = n;
-  [2,3,4,5,6].forEach(i => {
-    const el = document.getElementById(`ppl${i}`);
-    if(!el) return;
-    el.style.background = i===n?'#2E7D32':'#252525';
-    el.style.borderColor = i===n?'#4CAF50':'#333';
-    el.style.color = i===n?'#fff':'#aaa';
+function setPpl(n){
+  selectedPeople=n;
+  [2,3,4,5,6].forEach(i=>{
+    const el=document.getElementById('pp'+i);
+    if(!el)return;
+    el.style.background=i===n?'#005a2a':'#1a2a1a';
+    el.style.borderColor=i===n?'#00A651':'#2a3a2a';
+    el.style.color=i===n?'#fff':'#4a6a4a';
   });
-  const amt = parseInt(document.getElementById('demo-amount')?.value||'0');
-  const prev = document.getElementById('split-preview');
-  if(prev) prev.textContent = `Tu parte: ${formatCLP(Math.round(amt/n))}`;
+  const amt=parseInt(document.getElementById('da')?.value||'0');
+  const sp=document.getElementById('sp');
+  if(sp)sp.textContent=`Tu parte: ${CLP(Math.round(amt/n))}`;
 }
 
-function updateAmtPreview(val) {
-  const n = parseInt(val)||0;
-  const el = document.getElementById('amt-preview');
-  if(el) el.textContent = n>0 ? formatCLP(n) : '';
-  const prev = document.getElementById('split-preview');
-  if(prev) prev.textContent = `Tu parte: ${formatCLP(Math.round(n/selectedPeople))}`;
+function updatePrev(val){
+  const n=parseInt(val)||0;
+  const el=document.getElementById('ap');
+  if(el)el.textContent=n>0?CLP(n):'';
+  const sp=document.getElementById('sp');
+  if(sp)sp.textContent=`Tu parte: ${CLP(Math.round(n/selectedPeople))}`;
 }
 
-function parseNotifDemo(text) {
-  const m = document.getElementById('demo-merchant');
-  const a = document.getElementById('demo-amount');
-  if(!m||!a) return;
-  const amtMatch = text.match(/\$\s?([\d]{1,3}(?:\.[\d]{3})*)/);
-  if(amtMatch) {
-    const amt = parseInt(amtMatch[1].replace(/\./g,''));
-    a.value = amt;
-    updateAmtPreview(amt);
-  }
-  const merchMatch = text.match(/en\s+([A-ZÁÉÍÓÚÑ][^\n\r$]{2,30?}?)(?:\s+por|\s*$)/i);
-  if(merchMatch) m.value = merchMatch[1].trim();
-}
+function selInc(el){document.querySelectorAll('.itype-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
 
-function selectIncomeType(el) {
-  document.querySelectorAll('.income-type-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function fakeAdd() {
+function fakeAdd(){
+  const p=activeModalPhone||1;
   closeModal();
-  showToast(activeModalPhone||1, '✓ Gasto registrado', 'Comercio → categorizado automáticamente');
+  showToast(p,'✓ Movimiento registrado','Guardado y categorizado correctamente');
 }
 
-function showToast(phoneId, title, body) {
-  const phone = document.getElementById(`phone${phoneId}`);
-  const old = phone.querySelector('.notif-toast');
-  if(old) old.remove();
-  const div = document.createElement('div');
-  div.className = 'notif-toast';
-  div.innerHTML = `<span class="notif-icon">🏦</span><div><div class="notif-title">${title}</div><div class="notif-body">${body}</div></div>`;
-  phone.appendChild(div);
-  setTimeout(()=>div.remove(), 3200);
+function showToast(pid,title,body){
+  const phone=document.getElementById('phone'+pid);
+  phone.querySelector('.notif-toast')?.remove();
+  const d=document.createElement('div');
+  d.className='notif-toast';
+  d.innerHTML=`<span class="toast-icon">🏦</span><div><div class="toast-title">${title}</div><div class="toast-body">${body}</div></div>`;
+  phone.appendChild(d);
+  setTimeout(()=>d.remove(),3200);
 }
 
-// Initial render
-render(1);
-render(2);
+// ── INIT ─────────────────────────────────────────────────
+render(1);render(2);
 </script>
 </body>
 </html>
