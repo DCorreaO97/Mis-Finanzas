@@ -1,13 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
   <uses-permission android:name="android.permission.INTERNET"/>
-  <!-- OPTIONAL PERMISSIONS, REMOVE WHATEVER YOU DO NOT NEED -->
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
-  <!-- These require runtime permissions on M -->
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <!-- END OPTIONAL PERMISSIONS -->
+  <!-- Permiso para leer notificaciones de otras apps (Banco Falabella) -->
+  <!-- NOTA: este es un permiso de firma — el usuario debe activarlo manualmente -->
+  <!-- en Ajustes > Aplicaciones > Acceso especial > Acceso a notificaciones -->
+  <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+      tools:ignore="ProtectedPermissions"
+      xmlns:tools="http://schemas.android.com/tools"/>
 
   <queries>
     <!-- Support checking for http(s) links via the Linking API -->
@@ -26,5 +29,21 @@
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
+
+    <!--
+      Servicio que escucha notificaciones del Banco Falabella.
+      El usuario debe habilitarlo en:
+        Ajustes > Aplicaciones > Acceso especial > Acceso a notificaciones > Finanzas Chuma
+    -->
+    <service
+        android:name=".FalabellaNotificationService"
+        android:label="Lector Banco Falabella"
+        android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService"/>
+      </intent-filter>
+    </service>
+
   </application>
 </manifest>

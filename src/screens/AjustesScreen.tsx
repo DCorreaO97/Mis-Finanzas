@@ -15,10 +15,13 @@ const { NotificationListener } = NativeModules;
 export function AjustesScreen() {
   const { apiKey, setApiKey, merchantMemory, clearData, requestNotificationPermission } = useApp();
 
-  const [apiKeyInput,  setApiKeyInput]  = useState(apiKey);
-  const [showKey,      setShowKey]      = useState(false);
-  const [notifGranted, setNotifGranted] = useState<boolean | null>(null);
-  const [isSavingKey,  setIsSavingKey]  = useState(false);
+  const [apiKeyInput,    setApiKeyInput]    = useState(apiKey);
+  const [showKey,        setShowKey]        = useState(false);
+  const [notifGranted,   setNotifGranted]   = useState<boolean | null>(null);
+  const [isSavingKey,    setIsSavingKey]    = useState(false);
+  const [lastNotifPkg,   setLastNotifPkg]   = useState<string | null>(null);
+  const [watchedPkgs,    setWatchedPkgs]    = useState<string[]>([]);
+  const [showPkgDebug,   setShowPkgDebug]   = useState(false);
 
   useEffect(() => { setApiKeyInput(apiKey); }, [apiKey]);
 
@@ -27,6 +30,9 @@ export function AjustesScreen() {
     NotificationListener.isPermissionGranted()
       .then(setNotifGranted)
       .catch(() => setNotifGranted(false));
+    NotificationListener.getWatchedPackages?.()
+      .then((pkgs: string[]) => setWatchedPkgs(pkgs))
+      .catch(() => {});
   }, []);
 
   const handleSaveKey = async () => {
@@ -117,21 +123,73 @@ export function AjustesScreen() {
         {/* ─── Notificaciones Android ──────────────── */}
         {Platform.OS === 'android' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🔔 Notificaciones</Text>
+            <Text style={styles.sectionTitle}>🔔 Lector Banco Falabella</Text>
+            <Text style={styles.sectionDesc}>
+              Cuando llegue una notificación del Banco Falabella, la app la leerá y registrará
+              la transacción automáticamente.
+            </Text>
+
+            {/* Estado del permiso */}
             <View style={styles.permRow}>
               <View style={[styles.permDot, notifGranted === true && styles.permDotGreen]} />
               <Text style={styles.permText}>
                 {notifGranted === null
                   ? 'Verificando...'
                   : notifGranted
-                    ? 'Acceso a notificaciones activo'
-                    : 'Sin acceso a notificaciones'}
+                    ? '✓ Acceso a notificaciones activo'
+                    : '✗ Sin acceso a notificaciones'}
               </Text>
             </View>
+
+            {notifGranted === true && (
+              <View style={styles.notifOkCard}>
+                <Text style={styles.notifOkText}>
+                  ✅ Todo listo. Las próximas compras con tu tarjeta CMR o movimientos en
+                  Banco Falabella se registrarán automáticamente.
+                </Text>
+              </View>
+            )}
+
             {!notifGranted && (
-              <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={requestNotificationPermission}>
-                <Text style={[styles.btnText, { color: COLORS.green }]}>Ir a configuración del sistema</Text>
-              </TouchableOpacity>
+              <>
+                <View style={styles.stepCard}>
+                  <Text style={styles.stepTitle}>Cómo activarlo:</Text>
+                  <Text style={styles.stepText}>1. Toca el botón de abajo</Text>
+                  <Text style={styles.stepText}>2. En la lista, activa <Text style={styles.stepBold}>Finanzas Chuma</Text></Text>
+                  <Text style={styles.stepText}>3. Acepta la advertencia de Android</Text>
+                  <Text style={styles.stepText}>4. Vuelve a esta pantalla</Text>
+                </View>
+                <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={requestNotificationPermission}>
+                  <Text style={[styles.btnText, { color: COLORS.green }]}>
+                    Abrir Ajustes → Acceso a notificaciones
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Debug: paquetes vigilados */}
+            <TouchableOpacity
+              style={styles.debugToggle}
+              onPress={() => setShowPkgDebug(v => !v)}
+            >
+              <Text style={styles.debugToggleText}>
+                {showPkgDebug ? '▲' : '▼'} Info técnica (paquetes vigilados)
+              </Text>
+            </TouchableOpacity>
+            {showPkgDebug && (
+              <View style={styles.debugBox}>
+                <Text style={styles.debugTitle}>Paquetes Android que se escuchan:</Text>
+                {watchedPkgs.map(p => (
+                  <Text key={p} style={styles.debugPkg}>{p}</Text>
+                ))}
+                <Text style={styles.debugNote}>
+                  Si tu app del Banco Falabella no está en esta lista, contáctame con el
+                  nombre de paquete y lo agrego. Puedes verlo en Ajustes → Apps → Banco Falabella → info.
+                </Text>
+                {lastNotifPkg && (
+                  <Text style={styles.debugPkg}>Último recibido: {lastNotifPkg}</Text>
+                )}
+              </View>
             )}
           </View>
         )}
@@ -213,10 +271,22 @@ const styles = StyleSheet.create({
   btnDisabled:      { opacity: 0.5 },
   btnText:          { color: '#fff', fontSize: 14, fontWeight: '700' },
   link:             { color: COLORS.green, fontSize: 12, textAlign: 'center', marginTop: 2 },
-  permRow:          { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  permRow:          { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   permDot:          { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.expense },
   permDotGreen:     { backgroundColor: COLORS.income },
   permText:         { color: COLORS.textSecondary, fontSize: 13 },
+  notifOkCard:      { backgroundColor: COLORS.greenFaint, borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: COLORS.green + '40' },
+  notifOkText:      { color: COLORS.greenMid, fontSize: 12, lineHeight: 18 },
+  stepCard:         { backgroundColor: COLORS.surfaceHigh, borderRadius: 10, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: COLORS.border },
+  stepTitle:        { color: COLORS.textPrimary, fontSize: 12, fontWeight: '700', marginBottom: 6 },
+  stepText:         { color: COLORS.textSecondary, fontSize: 12, marginBottom: 3 },
+  stepBold:         { fontWeight: '700', color: COLORS.textPrimary },
+  debugToggle:      { paddingVertical: 8, alignItems: 'center', marginTop: 4 },
+  debugToggleText:  { color: COLORS.textMuted, fontSize: 11 },
+  debugBox:         { backgroundColor: COLORS.surfaceHigh, borderRadius: 8, padding: 10, borderWidth: 1, borderColor: COLORS.border },
+  debugTitle:       { color: COLORS.textMuted, fontSize: 10, fontWeight: '700', marginBottom: 6, textTransform: 'uppercase' },
+  debugPkg:         { color: COLORS.green, fontSize: 11, fontFamily: 'monospace', marginBottom: 3 },
+  debugNote:        { color: COLORS.textMuted, fontSize: 10, lineHeight: 15, marginTop: 8 },
   iosBanner:        { backgroundColor: '#EEF2FF', borderWidth: 1, borderColor: '#C7D2FE' },
   iosBannerTitle:   { color: '#3730A3', fontSize: 14, fontWeight: '700', marginBottom: 6 },
   iosBannerText:    { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20 },
