@@ -18,8 +18,9 @@ class FalabellaNotificationService : NotificationListenerService() {
 
     companion object {
         // Paquetes conocidos del Banco Falabella Chile
-        // Si el tuyo no está aquí, aparecerá en la pantalla de Ajustes → Debug
+        // "cl.android" es el package name oficial de la app Banco Falabella Chile en Play Store
         val FALABELLA_PACKAGES: Set<String> = setOf(
+            "cl.android",            // ← Banco Falabella Chile (Play Store, confirmado)
             "cl.bancofalabella",
             "cl.bancofalabella.app",
             "cl.falabella.banca",
