@@ -6,6 +6,8 @@ import { COLORS } from '../constants/colors';
 import { formatCLP, timeAgo } from '../utils/parseNotification';
 import { useApp } from '../context/AppContext';
 
+const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
 interface Props {
   transaction: Transaction;
   isNew?: boolean;
@@ -13,8 +15,13 @@ interface Props {
 }
 
 export function TransactionItem({ transaction: tx, isNew = false, defaultExpanded = false }: Props) {
-  const { categorize } = useApp();
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const { categorize, moveTransaction } = useApp();
+  const [expanded, setExpanded]     = useState(defaultExpanded);
+  const [movingMes, setMovingMes]   = useState(false);
+
+  const txDate    = new Date(tx.date);
+  const txYear    = txDate.getFullYear();
+  const txMonth   = txDate.getMonth() + 1; // 1-12
 
   const isIncome      = tx.direction === 'in';
   const hasSplit      = tx.split !== null && tx.direction === 'out';
@@ -141,6 +148,54 @@ export function TransactionItem({ transaction: tx, isNew = false, defaultExpande
               </TouchableOpacity>
             </View>
           )}
+
+          {/* ── Mover a otro mes ── */}
+          {!movingMes ? (
+            <TouchableOpacity
+              style={styles.moveBtn}
+              onPress={() => setMovingMes(true)}
+            >
+              <Text style={styles.moveBtnText}>📅 Mover a otro mes</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.movePanel}>
+              <Text style={styles.movePanelTitle}>¿A qué mes mover esta transacción?</Text>
+              <View style={styles.moveYearRow}>
+                <TouchableOpacity onPress={() => {}} style={styles.moveYearBtn}>
+                  <Text style={styles.moveYearBtnText}>◀ {txYear - 1}</Text>
+                </TouchableOpacity>
+                <Text style={styles.moveYearLabel}>{txYear}</Text>
+                <TouchableOpacity onPress={() => {}} style={styles.moveYearBtn}>
+                  <Text style={styles.moveYearBtnText}>{txYear + 1} ▶</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.moveGrid}>
+                {MONTH_NAMES.map((name, idx) => {
+                  const m    = idx + 1;
+                  const curr = m === txMonth;
+                  return (
+                    <TouchableOpacity
+                      key={m}
+                      disabled={curr}
+                      style={[styles.moveMonthChip, curr && styles.moveMonthChipCurr]}
+                      onPress={async () => {
+                        await moveTransaction(tx.id, txYear, m);
+                        setMovingMes(false);
+                        setExpanded(false);
+                      }}
+                    >
+                      <Text style={[styles.moveMonthLabel, curr && styles.moveMonthLabelCurr]}>
+                        {name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <TouchableOpacity onPress={() => setMovingMes(false)}>
+                <Text style={styles.moveCancelBtn}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
     </View>
@@ -180,4 +235,20 @@ const styles = StyleSheet.create({
   catConfirmed:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   catConfirmedText: { color: COLORS.textSecondary, fontSize: 12 },
   collapseBtn:      { color: COLORS.green, fontSize: 11, fontWeight: '600' },
+
+  // ── Mover mes ──
+  moveBtn:           { marginTop: 12, paddingVertical: 8, alignItems: 'center', borderRadius: 10, backgroundColor: COLORS.surfaceHigh, borderWidth: 1, borderColor: COLORS.border },
+  moveBtnText:       { color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
+  movePanel:         { marginTop: 12, backgroundColor: COLORS.surfaceHigh, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: COLORS.border },
+  movePanelTitle:    { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 10, textAlign: 'center' },
+  moveYearRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  moveYearBtn:       { padding: 6 },
+  moveYearBtnText:   { color: COLORS.green, fontSize: 12, fontWeight: '700' },
+  moveYearLabel:     { color: COLORS.textPrimary, fontSize: 14, fontWeight: '800' },
+  moveGrid:          { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
+  moveMonthChip:     { width: '23%', paddingVertical: 7, alignItems: 'center', borderRadius: 8, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },
+  moveMonthChipCurr: { backgroundColor: COLORS.greenFaint, borderColor: COLORS.green },
+  moveMonthLabel:    { color: COLORS.textSecondary, fontSize: 12, fontWeight: '500' },
+  moveMonthLabelCurr:{ color: COLORS.green, fontWeight: '700' },
+  moveCancelBtn:     { color: COLORS.textMuted, fontSize: 11, textAlign: 'center', paddingVertical: 4 },
 });

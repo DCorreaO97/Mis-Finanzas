@@ -19,6 +19,7 @@ interface AppContextValue {
   addTransaction:  (params: AddTransactionParams) => Promise<void>;
   categorize:      (txId: string, categoryId: string) => Promise<void>;
   deleteTransaction: (txId: string) => Promise<void>;
+  moveTransaction: (txId: string, newYear: number, newMonth: number) => Promise<void>;
   clearData:       () => Promise<void>;
   requestNotificationPermission: () => void;
 }
@@ -187,6 +188,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  /**
+   * Mueve una transacción a otro mes/año conservando el mismo día.
+   * Útil para reasignar sueldo o arriendo al mes correcto.
+   */
+  const moveTransaction = useCallback(async (txId: string, newYear: number, newMonth: number) => {
+    setTransactions(prev => {
+      const updated = prev.map(t => {
+        if (t.id !== txId) return t;
+        const original = new Date(t.date);
+        // Mantiene el mismo día; si el nuevo mes tiene menos días, clampea al último día
+        const day = Math.min(
+          original.getDate(),
+          new Date(newYear, newMonth, 0).getDate() // día 0 del mes siguiente = último día del mes
+        );
+        const newDate = new Date(newYear, newMonth - 1, day, original.getHours(), original.getMinutes());
+        return { ...t, date: newDate.toISOString() };
+      });
+      Storage.saveTransactions(updated);
+      return updated;
+    });
+  }, []);
+
   const clearData = useCallback(async () => {
     setTransactions([]);
     setMerchantMemory({});
@@ -214,7 +237,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       transactions, merchantMemory, apiKey, pendingCount, isLoading,
-      setApiKey, addTransaction, categorize, deleteTransaction, clearData,
+      setApiKey, addTransaction, categorize, deleteTransaction, moveTransaction, clearData,
       requestNotificationPermission: requestPermission,
     }}>
       {children}
