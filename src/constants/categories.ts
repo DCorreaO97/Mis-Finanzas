@@ -14,15 +14,21 @@ export interface IncomeType {
 }
 
 export const CATEGORIES: Category[] = [
-  { id: 'inversiones',  label: 'Inversiones',  icon: '📈', color: '#2E7D32' },
-  { id: 'departamento', label: 'Departamento', icon: '🏠', color: '#388E3C' },
-  { id: 'ropa',         label: 'Ropa',         icon: '👕', color: '#43A047' },
-  { id: 'restaurantes', label: 'Restaurantes', icon: '🍽️', color: '#4CAF50' },
-  { id: 'supermercado', label: 'Supermercado', icon: '🛒', color: '#66BB6A' },
-  { id: 'deporte',      label: 'Deporte',      icon: '⚽', color: '#81C784' },
-  { id: 'transporte',   label: 'Transporte',   icon: '🚌', color: '#1B5E20' },
-  { id: 'carrete',      label: 'Carrete',      icon: '🎉', color: '#558B2F' },
-  { id: 'salud',        label: 'Salud',        icon: '💊', color: '#33691E' },
+  { id: 'inversiones',  label: 'Inversiones',         icon: '📈', color: '#2E7D32' },
+  { id: 'departamento', label: 'Departamento',        icon: '🏠', color: '#388E3C' },
+  { id: 'ropa',         label: 'Ropa',                icon: '👕', color: '#43A047' },
+  { id: 'restaurantes', label: 'Restaurantes',        icon: '🍽️', color: '#4CAF50' },
+  { id: 'supermercado', label: 'Supermercado',        icon: '🛒', color: '#66BB6A' },
+  { id: 'deporte',      label: 'Salud/Deporte',       icon: '⚽', color: '#81C784' },
+  { id: 'transporte',   label: 'Transporte',          icon: '🚌', color: '#1B5E20' },
+  { id: 'carrete',      label: 'Carrete',             icon: '🎉', color: '#558B2F' },
+  { id: 'salud',        label: 'Salud',               icon: '💊', color: '#33691E' },
+  { id: 'compras_imp',  label: 'Compras Impulsivas',  icon: '🛍️', color: '#7B1FA2' },
+  { id: 'entretenim',   label: 'Entretención/Viajes', icon: '✈️', color: '#0288D1' },
+  { id: 'suscripciones',label: 'Suscripciones',       icon: '📱', color: '#00838F' },
+  { id: 'regalos',      label: 'Regalos',             icon: '🎁', color: '#E91E63' },
+  { id: 'otras',        label: 'Otras',               icon: '📦', color: '#607D8B' },
+  { id: 'pago_interno', label: 'Pago Interno',        icon: '🔄', color: '#546E7A' },
 ];
 
 export const INCOME_TYPES: IncomeType[] = [

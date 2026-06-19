@@ -7,7 +7,13 @@ export type CategoryId =
   | 'deporte'
   | 'transporte'
   | 'carrete'
-  | 'salud';
+  | 'salud'
+  | 'compras_imp'
+  | 'entretenim'
+  | 'suscripciones'
+  | 'regalos'
+  | 'otras'
+  | 'pago_interno';
 
 export type IncomeTypeId =
   | 'sueldo'
