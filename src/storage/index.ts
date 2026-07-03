@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { Transaction, MerchantMemory } from '../types';
 
 const KEYS = {
@@ -6,6 +7,9 @@ const KEYS = {
   MERCHANT_MEMORY: 'fb_merchant_memory_v3',
   API_KEY:         'fb_anthropic_api_key',
 } as const;
+
+// SecureStore no acepta algunos caracteres en las keys; usar solo [A-Za-z0-9._-]
+const SECURE_API_KEY = 'fb_anthropic_api_key';
 
 export const Storage = {
   async getTransactions(): Promise<Transaction[]> {
@@ -29,11 +33,34 @@ export const Storage = {
   },
 
   async getApiKey(): Promise<string> {
-    return (await AsyncStorage.getItem(KEYS.API_KEY)) ?? '';
+    try {
+      const secure = await SecureStore.getItemAsync(SECURE_API_KEY);
+      if (secure) return secure;
+      // Migración: si existe en AsyncStorage (versión anterior), moverla a SecureStore
+      const legacy = await AsyncStorage.getItem(KEYS.API_KEY);
+      if (legacy) {
+        await SecureStore.setItemAsync(SECURE_API_KEY, legacy);
+        await AsyncStorage.removeItem(KEYS.API_KEY);
+        return legacy;
+      }
+      return '';
+    } catch {
+      // Fallback si SecureStore no está disponible en este dispositivo
+      return (await AsyncStorage.getItem(KEYS.API_KEY)) ?? '';
+    }
   },
 
   async saveApiKey(key: string): Promise<void> {
-    await AsyncStorage.setItem(KEYS.API_KEY, key.trim());
+    const trimmed = key.trim();
+    try {
+      if (trimmed) {
+        await SecureStore.setItemAsync(SECURE_API_KEY, trimmed);
+      } else {
+        await SecureStore.deleteItemAsync(SECURE_API_KEY);
+      }
+    } catch {
+      await AsyncStorage.setItem(KEYS.API_KEY, trimmed);
+    }
   },
 
   async clearAll(): Promise<void> {

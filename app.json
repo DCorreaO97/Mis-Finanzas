@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "android": {
       "package": "com.falabellafinanzas",
       "adaptiveIcon": {
@@ -23,7 +26,8 @@
         {
           "color": "#4CAF50"
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

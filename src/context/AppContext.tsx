@@ -31,6 +31,7 @@ export interface AddTransactionParams {
   direction:  'in' | 'out';
   split?:     { totalPeople: number; recovered: number; description: string } | null;
   rawText?:   string;
+  date?:      string;   // ISO; si no viene, se usa la fecha actual
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -454,7 +455,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addTransaction = useCallback(async (params: AddTransactionParams) => {
-    const { merchant, amount, type, direction, split, rawText } = params;
+    const { merchant, amount, type, direction, split, rawText, date } = params;
 
     const splitInfo = (split && direction === 'out')
       ? {
@@ -475,7 +476,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       amount,
       type,
       direction,
-      date:        new Date().toISOString(),
+      date:        date ?? new Date().toISOString(),
       category:    category as any ?? null,
       aiConfident: confident,
       aiSource:    source as any,
@@ -484,9 +485,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     if (category && direction === 'out' && source !== 'fallback') {
-      const updatedMemory = { ...merchantMemory, [merchant.toLowerCase()]: category };
-      setMerchantMemory(updatedMemory);
-      await Storage.saveMerchantMemory(updatedMemory);
+      // Forma funcional: evita perder actualizaciones si llegan 2 notifs casi juntas
+      setMerchantMemory(prev => {
+        const updated: MerchantMemory = { ...prev, [merchant.toLowerCase()]: category as any };
+        Storage.saveMerchantMemory(updated);
+        return updated;
+      });
     }
 
     setTransactions(prev => {
@@ -502,9 +506,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const tx = transactions.find(t => t.id === txId);
     if (!tx) return;
 
-    const updatedMemory = { ...merchantMemory, [tx.merchant.toLowerCase()]: categoryId };
-    setMerchantMemory(updatedMemory);
-    await Storage.saveMerchantMemory(updatedMemory);
+    setMerchantMemory(prev => {
+      const updated: MerchantMemory = { ...prev, [tx.merchant.toLowerCase()]: categoryId as any };
+      Storage.saveMerchantMemory(updated);
+      return updated;
+    });
 
     const updatedTxs = transactions.map(t =>
       t.id === txId
@@ -546,9 +552,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearData = useCallback(async () => {
-    setTransactions([]);
+    // Recargar los datos de muestra inmediatamente (sin esperar reinicio de la app)
+    const fresh = buildSampleData();
+    setTransactions(fresh);
     setMerchantMemory({});
     await Storage.clearAll();
+    await Storage.saveTransactions(fresh);
   }, []);
 
   const { requestPermission } = useNotificationListener(
@@ -561,6 +570,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         type:      parsed.type,
         direction: parsed.direction,
         rawText:   parsed.rawText,
+        // Usar la hora real de la notificación (importante si venía encolada)
+        date:      notif.timestamp ? new Date(notif.timestamp).toISOString() : undefined,
       });
     }, [addTransaction])
   );

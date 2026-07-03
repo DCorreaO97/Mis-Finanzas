@@ -73,10 +73,6 @@ export function AjustesScreen() {
     );
   };
 
-  const maskedKey = apiKeyInput
-    ? `${apiKeyInput.slice(0, 8)}${'•'.repeat(Math.max(0, apiKeyInput.length - 12))}${apiKeyInput.slice(-4)}`
-    : '';
-
   const merchantEntries = Object.entries(merchantMemory);
 
   return (
@@ -96,7 +92,7 @@ export function AjustesScreen() {
           <View style={styles.keyRow}>
             <TextInput
               style={[styles.input, styles.keyInput]}
-              value={showKey ? apiKeyInput : maskedKey}
+              value={apiKeyInput}
               onChangeText={setApiKeyInput}
               placeholder="sk-ant-..."
               placeholderTextColor={COLORS.textMuted}

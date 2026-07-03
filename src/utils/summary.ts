@@ -41,16 +41,27 @@ export function getMonthSummary(
     return d.getFullYear() === year && d.getMonth() === month;
   });
 
-  const income   = txs
-    .filter(t => t.direction === 'in')
-    .reduce((s, t) => s + t.amount, 0);
+  // Pago interno = plata entre cuentas propias: no es ingreso ni gasto.
+  // Los montos se toman en valor absoluto porque devoluciones y pagos
+  // internos pueden venir con signo negativo desde el banco.
+  const real = txs.filter(t => t.type !== 'pago_interno');
 
-  const expenses = txs
+  const income = real
+    .filter(t => t.direction === 'in' && t.type !== 'devolucion')
+    .reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  const refunds = real
+    .filter(t => t.type === 'devolucion')
+    .reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  const expenses = real
     .filter(t => t.direction === 'out')
-    .reduce((s, t) => s + effectiveAmount(t), 0);
+    .reduce((s, t) => s + Math.abs(effectiveAmount(t)), 0);
 
-  const balance     = income - expenses;
-  const savingsRate = income > 0 ? Math.round((balance / income) * 100) : 0;
+  const balance     = income + refunds - expenses;
+  const savingsRate = income > 0
+    ? Math.round((balance / income) * 100)
+    : (expenses > 0 ? -100 : 0);
   const pending     = txs.filter(t => t.direction === 'out' && t.category === null).length;
 
   return { income, expenses, balance, savingsRate, pending, txCount: txs.length };
@@ -61,24 +72,20 @@ export function getCategoryTotals(
   year: number,
   month: number
 ): Array<{ id: string; label: string; icon: string; color: string; total: number; count: number }> {
-  return CATEGORIES.map(cat => ({
-    ...cat,
-    total: transactions
-      .filter(t =>
-        t.direction === 'out' &&
-        t.category === cat.id &&
-        new Date(t.date).getFullYear() === year &&
-        new Date(t.date).getMonth() === month
-      )
-      .reduce((s, t) => s + effectiveAmount(t), 0),
-    count: transactions
-      .filter(t =>
-        t.direction === 'out' &&
-        t.category === cat.id &&
-        new Date(t.date).getFullYear() === year &&
-        new Date(t.date).getMonth() === month
-      ).length,
-  })).filter(c => c.total > 0).sort((a, b) => b.total - a.total);
+  return CATEGORIES.map(cat => {
+    const catTxs = transactions.filter(t =>
+      t.direction === 'out' &&
+      t.type !== 'pago_interno' &&
+      t.category === cat.id &&
+      new Date(t.date).getFullYear() === year &&
+      new Date(t.date).getMonth() === month
+    );
+    return {
+      ...cat,
+      total: catTxs.reduce((s, t) => s + Math.abs(effectiveAmount(t)), 0),
+      count: catTxs.length,
+    };
+  }).filter(c => c.total > 0).sort((a, b) => b.total - a.total);
 }
 
 export function getAllMonths(transactions: Transaction[]): MonthKey[] {

@@ -64,10 +64,18 @@ export const LOCAL_MERCHANT_MAP: Record<string, CategoryId> = {
   // Salud
   farmacia: 'salud', 'cruz verde': 'salud', salcobrand: 'salud',
   ahumada: 'salud', clinica: 'salud', isapre: 'salud', fonasa: 'salud',
-  // Entretenimiento
-  netflix: 'carrete', spotify: 'carrete', steam: 'carrete',
-  'hbo max': 'carrete', disney: 'carrete', prime: 'carrete',
+  // Suscripciones (servicios recurrentes)
+  netflix: 'suscripciones', spotify: 'suscripciones', steam: 'suscripciones',
+  'hbo max': 'suscripciones', disney: 'suscripciones', prime: 'suscripciones',
+  'rappi pro': 'suscripciones',
+  // Compras impulsivas / retail online
+  'falabella.com': 'compras_imp', aliexpress: 'compras_imp',
+  // Entretención / Viajes
+  latam: 'entretenim', booking: 'entretenim',
+  edreams: 'entretenim', viator: 'entretenim', ticketplus: 'entretenim',
+  puntoticket: 'entretenim',
   // Departamento / Vivienda
   dividendo: 'departamento', 'gastos comunes': 'departamento',
   arriendo: 'departamento', 'banco estado': 'departamento',
+  neat: 'departamento',
 };

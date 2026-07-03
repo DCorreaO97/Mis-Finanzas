@@ -17,6 +17,7 @@
     "expo-dev-client": "~4.0.19",
     "expo-device": "~6.0.2",
     "expo-notifications": "~0.28.9",
+    "expo-secure-store": "~13.0.2",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-native": "0.74.5",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/react": "~18.2.79",
     "@types/react-native": "^0.73.0",
+    "sharp": "^0.35.2",
     "typescript": "^5.3.3",
     "xlsx": "^0.18.5"
   },

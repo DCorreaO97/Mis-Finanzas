@@ -21,8 +21,8 @@ class NotificationListenerModule(reactContext: ReactApplicationContext) :
 
     override fun initialize() {
         super.initialize()
-        // Cuando el módulo se inicializa, registrar el callback y vaciar la cola
-        FalabellaNotificationService.registerCallback { params ->
+        // Cuando el módulo se inicializa, registrar el callback y vaciar la cola persistida
+        FalabellaNotificationService.registerCallback(reactApplicationContext) { params ->
             sendEvent(params)
         }
     }

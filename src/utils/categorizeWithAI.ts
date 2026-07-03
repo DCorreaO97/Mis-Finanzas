@@ -53,7 +53,8 @@ export async function categorizeTransaction(
         messages: [{
           role: 'user',
           content: [
-            'Categorías válidas: inversiones, departamento, ropa, restaurantes, supermercado, deporte, transporte, carrete, salud',
+            'Categorías válidas (responde con el id exacto): inversiones, departamento, ropa, restaurantes, supermercado, deporte, transporte, carrete, salud, compras_imp, entretenim, suscripciones, regalos, otras',
+            'Guía: compras_imp = compras impulsivas (Falabella, AliExpress, retail online); entretenim = entretención, panoramas y viajes (vuelos, hoteles, cine, conciertos); suscripciones = servicios recurrentes (Netflix, Spotify, Disney+); regalos = regalos y matrimonios; otras = lo que no calce en ninguna',
             `Comercio: "${merchant}"`,
             `Monto: $${amount.toLocaleString('es-CL')}`,
             `Tipo de movimiento: ${type}`,
