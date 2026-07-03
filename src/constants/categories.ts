@@ -50,6 +50,7 @@ export const LOCAL_MERCHANT_MAP: Record<string, CategoryId> = {
   // Transporte
   uber: 'transporte', cabify: 'transporte', didi: 'transporte',
   metro: 'transporte', bip: 'transporte', transantiago: 'transporte',
+  servipag: 'transporte',
   // Restaurantes / Delivery
   mcdonalds: 'restaurantes', 'burger king': 'restaurantes', starbucks: 'restaurantes',
   rappi: 'restaurantes', ubereats: 'restaurantes', pedidosya: 'restaurantes',
