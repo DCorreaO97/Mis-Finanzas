@@ -40,6 +40,16 @@ export const INCOME_TYPES: IncomeType[] = [
 
 export const CATEGORY_IDS = new Set(CATEGORIES.map(c => c.id));
 
+/**
+ * Transferencias recibidas que NO son ingreso sino reembolso de un gasto:
+ * se registran como devolución y reducen el gasto de la categoría indicada.
+ * Match por substring (lowercase) sobre el nombre del remitente.
+ */
+export const INCOME_REFUND_MAP: Record<string, CategoryId> = {
+  rencoret: 'departamento',   // Francisco Rencoret — aporte arriendo mensual
+  richasse: 'departamento',   // Benjamín Richasse — aporte arriendo mensual
+};
+
 export const LOCAL_MERCHANT_MAP: Record<string, CategoryId> = {
   // Supermercados
   jumbo: 'supermercado', lider: 'supermercado', tottus: 'supermercado',

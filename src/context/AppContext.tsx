@@ -7,6 +7,7 @@ import { Transaction, MerchantMemory } from '../types';
 import { Storage } from '../storage';
 import { parseNotification } from '../utils/parseNotification';
 import { categorizeTransaction } from '../utils/categorizeWithAI';
+import { INCOME_REFUND_MAP } from '../constants/categories';
 import { useNotificationListener, FalabellaNotification } from '../hooks/useNotificationListener';
 
 interface AppContextValue {
@@ -50,8 +51,8 @@ function buildSampleData(): Transaction[] {
     { id: 'import-372', merchant: "TRANSF. DE 003", amount: 288761, type: 'deposito', direction: 'in', date: '2026-07-02T12:00:00.000Z', category: 'otros_ingresos', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-373', merchant: "PAGO SERVIPAG SANTIAGO CHL", amount: 29500, type: 'compra', direction: 'out', date: '2026-07-01T12:00:00.000Z', category: 'transporte', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-374', merchant: "TRANSF. PARA COMUNIDAD EDI", amount: 357072, type: 'compra', direction: 'out', date: '2026-07-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-375', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 565582, type: 'deposito', direction: 'in', date: '2026-07-01T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-376', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 656000, type: 'deposito', direction: 'in', date: '2026-06-30T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-375', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 565582, type: 'devolucion', direction: 'in', date: '2026-07-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-376', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 656000, type: 'devolucion', direction: 'in', date: '2026-06-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-377', merchant: "REMUNERACIONES", amount: 3142879, type: 'deposito', direction: 'in', date: '2026-06-26T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-378', merchant: "TRANSF. PARA COMUNIDAD EDI", amount: 190000, type: 'compra', direction: 'out', date: '2026-06-24T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-379', merchant: "TRANSF PARA PAGO TARJETA CMR", amount: -2881170, type: 'pago_interno', direction: 'in', date: '2026-06-22T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -144,7 +145,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-17', merchant: "COMPRA MERCADOPAGO *MOVILLAN", amount: 6555, type: 'compra', direction: 'out', date: '2026-06-03T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-18', merchant: "COMPRA FABRICS", amount: 48085, type: 'compra', direction: 'out', date: '2026-06-03T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-19', merchant: "TRANSF. PARA ANTONIO VERGA", amount: 9885, type: 'compra', direction: 'out', date: '2026-06-03T12:00:00.000Z', category: 'carrete', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-20', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 710000, type: 'deposito', direction: 'in', date: '2026-06-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-20', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 710000, type: 'devolucion', direction: 'in', date: '2026-06-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-21', merchant: "IMPUESTO COMPRA CUOTAS FALABELLA.COM", amount: 2317, type: 'compra', direction: 'out', date: '2026-06-01T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-22', merchant: "COMPRA FALABELLA.COM", amount: 584991, type: 'compra', direction: 'out', date: '2026-06-01T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-23', merchant: "COMPRA NEAT PAYER 1", amount: 1470155, type: 'compra', direction: 'out', date: '2026-06-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
@@ -152,7 +153,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-25', merchant: "TRANSF. PARA KHIPU CLBS C", amount: 22742, type: 'compra', direction: 'out', date: '2026-06-01T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-26', merchant: "TRANSF. PARA COMUNIDAD EDI", amount: 500000, type: 'compra', direction: 'out', date: '2026-06-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-27', merchant: "TRANSF. PARA CATERINA LEYL", amount: 156000, type: 'compra', direction: 'out', date: '2026-06-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-28', merchant: "TRANSF. DE BENJAMIN RICHASSE SAN MARTIN", amount: 619254, type: 'deposito', direction: 'in', date: '2026-06-01T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-28', merchant: "TRANSF. DE BENJAMIN RICHASSE SAN MARTIN", amount: 619254, type: 'devolucion', direction: 'in', date: '2026-06-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-29', merchant: "PAGO TARJETA CMR", amount: -1172802, type: 'pago_interno', direction: 'in', date: '2026-05-29T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-30', merchant: "COMPRA OKM NUEVA LAS CONDES", amount: 1290, type: 'compra', direction: 'out', date: '2026-05-29T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-31', merchant: "COMPRA MERCADOPAGO *BLACKCHI", amount: 15378, type: 'compra', direction: 'out', date: '2026-05-29T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
@@ -206,11 +207,11 @@ function buildSampleData(): Transaction[] {
     { id: 'import-79', merchant: "TRANSF. PARA CARLOS MENA", amount: 8000, type: 'compra', direction: 'out', date: '2026-05-08T12:00:00.000Z', category: 'regalos', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-80', merchant: "REMUNERACIONES", amount: 28686, type: 'deposito', direction: 'in', date: '2026-05-08T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-81', merchant: "TRANSF. PARA MAGDALENA CAS", amount: 45000, type: 'compra', direction: 'out', date: '2026-05-05T12:00:00.000Z', category: 'entretenim', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-82', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 716473, type: 'deposito', direction: 'in', date: '2026-05-05T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-82', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 716473, type: 'devolucion', direction: 'in', date: '2026-05-05T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-83', merchant: "TRANSF. PARA TOMAS LATORRE", amount: 50000, type: 'compra', direction: 'out', date: '2026-05-05T12:00:00.000Z', category: 'carrete', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-84', merchant: "TRANSF. PARA CATERINA LEYL", amount: 10000, type: 'compra', direction: 'out', date: '2026-05-04T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-85', merchant: "TRANSF. PARA CATERINA LEYL", amount: 185000, type: 'compra', direction: 'out', date: '2026-05-04T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-86', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 626473, type: 'deposito', direction: 'in', date: '2026-05-04T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-86', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 626473, type: 'devolucion', direction: 'in', date: '2026-05-04T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-87', merchant: "TRANSF. PARA ENRIQUE ORTIZ", amount: 1450000, type: 'compra', direction: 'out', date: '2026-05-04T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-88', merchant: "TRANSF. PARA KHIPU CLBS C", amount: 22742, type: 'compra', direction: 'out', date: '2026-04-30T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-89', merchant: "TRANSF. PARA FELIPE ENEROS", amount: 14587, type: 'compra', direction: 'out', date: '2026-04-30T12:00:00.000Z', category: 'carrete', aiConfident: true, aiSource: 'local', split: null },
@@ -237,15 +238,15 @@ function buildSampleData(): Transaction[] {
     { id: 'import-110', merchant: "COMPRA FARMACIA CONDELL", amount: 14990, type: 'compra', direction: 'out', date: '2026-04-04T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-111', merchant: "COMPRA MARTA ELENA FUENZALI", amount: 1900, type: 'compra', direction: 'out', date: '2026-04-04T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-112', merchant: "COMPRA MERCADOPAGO *MARCELAL", amount: 11600, type: 'compra', direction: 'out', date: '2026-04-02T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-113', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 636973, type: 'deposito', direction: 'in', date: '2026-04-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-113', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 636973, type: 'devolucion', direction: 'in', date: '2026-04-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-114', merchant: "TRANSF. DE FRANCISCO JAVIER GARCI", amount: 18000, type: 'deposito', direction: 'in', date: '2026-04-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-115', merchant: "COMPRA FALABELLA.COM", amount: 42970, type: 'compra', direction: 'out', date: '2026-04-01T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-116', merchant: "TRANSF. PARA ROMERO MARTIN", amount: 35000, type: 'compra', direction: 'out', date: '2026-04-01T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-117', merchant: "COMPRA OTROSPAGOS COM COND", amount: 336229, type: 'compra', direction: 'out', date: '2026-03-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-118', merchant: "TRANSF PARA PAGO TARJETA CMR", amount: -1000236, type: 'pago_interno', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-119', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 112073, type: 'deposito', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-120', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 78230, type: 'deposito', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-121', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 536667, type: 'deposito', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-119', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 112073, type: 'devolucion', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-120', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 78230, type: 'devolucion', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-121', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 536667, type: 'devolucion', direction: 'in', date: '2026-03-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-122', merchant: "TRANSF. PARA ENRIQUE ORTIZ", amount: 1450000, type: 'compra', direction: 'out', date: '2026-03-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-123', merchant: "TRANSF. PARA DIEGO BRAVO", amount: 17350, type: 'compra', direction: 'out', date: '2026-03-30T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-124', merchant: "COMPRA SABA ARAUCO KENNEDY", amount: 1000, type: 'compra', direction: 'out', date: '2026-03-29T12:00:00.000Z', category: 'transporte', aiConfident: true, aiSource: 'local', split: null },
@@ -316,7 +317,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-189', merchant: "COMPRA INVERSIONES SOL CARI", amount: 1300, type: 'compra', direction: 'out', date: '2026-02-28T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-190', merchant: "COMPRA TUU*PLAYA FARO", amount: 2500, type: 'compra', direction: 'out', date: '2026-02-28T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-191', merchant: "COMPRA MERCADOPAGO *SOCIEDAD", amount: 20000, type: 'compra', direction: 'out', date: '2026-02-27T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-192', merchant: "TRANSF. DE BENJAMIN RICHASSE SAN MARTIN", amount: 542817, type: 'deposito', direction: 'in', date: '2026-02-27T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-192', merchant: "TRANSF. DE BENJAMIN RICHASSE SAN MARTIN", amount: 542817, type: 'devolucion', direction: 'in', date: '2026-02-27T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-193', merchant: "COMPRA OTROSPAGOS COM COND", amount: 338462, type: 'compra', direction: 'out', date: '2026-02-26T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-194', merchant: "COMPRA TOTTUS APP", amount: 25500, type: 'compra', direction: 'out', date: '2026-02-26T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-195', merchant: "PAGO TARJETA CMR", amount: -500000, type: 'pago_interno', direction: 'in', date: '2026-02-26T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -325,7 +326,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-198', merchant: "TRANSF PARA PAGO TARJETA CMR", amount: -500000, type: 'pago_interno', direction: 'in', date: '2026-02-26T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-199', merchant: "TRANSF. PARA BTG PACTUAL", amount: 1500000, type: 'compra', direction: 'out', date: '2026-02-26T12:00:00.000Z', category: 'inversiones', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-200', merchant: "PAGO TARJETA CMR", amount: -1311446, type: 'pago_interno', direction: 'in', date: '2026-02-25T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-201', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 632817, type: 'deposito', direction: 'in', date: '2026-02-25T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-201', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 632817, type: 'devolucion', direction: 'in', date: '2026-02-25T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-202', merchant: "COMPRA MERCADOPAGO *FURO", amount: 51084, type: 'compra', direction: 'out', date: '2026-02-24T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-203', merchant: "COMPRA FALABELLA.COM", amount: 25640, type: 'compra', direction: 'out', date: '2026-02-23T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-204', merchant: "PAGO TARJETA CMR", amount: -25640, type: 'pago_interno', direction: 'in', date: '2026-02-23T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -380,7 +381,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-253', merchant: "COMPRA FORK NUEVA LAS CONDES", amount: 7336, type: 'compra', direction: 'out', date: '2026-02-02T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-254', merchant: "COMPRA TOTTUS APP", amount: 76075, type: 'compra', direction: 'out', date: '2026-02-02T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-255', merchant: "DEVOLUCION COMPRA TOTTUS APP", amount: -2464, type: 'devolucion', direction: 'in', date: '2026-02-02T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-256', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 546285, type: 'deposito', direction: 'in', date: '2026-02-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-256', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 546285, type: 'devolucion', direction: 'in', date: '2026-02-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-257', merchant: "TRANSF. PARA MAURICIO GOME", amount: 3000, type: 'compra', direction: 'out', date: '2026-02-02T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-258', merchant: "COMPRA SUMUP * EL ROQUIN", amount: 2000, type: 'compra', direction: 'out', date: '2026-02-01T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-259', merchant: "COMPRA MASSALUD LICAN", amount: 1950, type: 'compra', direction: 'out', date: '2026-01-30T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
@@ -389,7 +390,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-262', merchant: "TRANSF. PARA BTG PACTUAL", amount: 1300000, type: 'compra', direction: 'out', date: '2026-01-29T12:00:00.000Z', category: 'inversiones', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-263', merchant: "TRANSF. PARA FRANCISCO NAV", amount: 14418, type: 'compra', direction: 'out', date: '2026-01-27T12:00:00.000Z', category: 'carrete', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-264', merchant: "TRANSF PARA PAGO TARJETA CMR", amount: -1486130, type: 'pago_interno', direction: 'in', date: '2026-01-23T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-265', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 520000, type: 'deposito', direction: 'in', date: '2026-01-23T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-265', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 520000, type: 'devolucion', direction: 'in', date: '2026-01-23T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-266', merchant: "COMPRA FORK NUEVA LAS CONDES", amount: 5993, type: 'compra', direction: 'out', date: '2026-01-22T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-267', merchant: "COMPRA NOTARIA MANRIQUEZ", amount: 220000, type: 'compra', direction: 'out', date: '2026-01-22T12:00:00.000Z', category: 'inversiones', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-268', merchant: "PAGO TARJETA CMR", amount: -1486130, type: 'pago_interno', direction: 'in', date: '2026-01-22T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -414,9 +415,9 @@ function buildSampleData(): Transaction[] {
     { id: 'import-287', merchant: "COMPRA FALABELLA.COM", amount: 2930, type: 'compra', direction: 'out', date: '2026-01-15T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-288', merchant: "TRANSF. PARA ROMERO MARTIN", amount: 35000, type: 'compra', direction: 'out', date: '2026-01-15T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-289', merchant: "TRANSF. PARA KHIPU CLBS C", amount: 18742, type: 'compra', direction: 'out', date: '2026-01-14T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-290', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 250000, type: 'deposito', direction: 'in', date: '2026-01-05T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-290', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 250000, type: 'devolucion', direction: 'in', date: '2026-01-05T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-291', merchant: "TRANSF. PARA AGUSTIN SANTA", amount: 46053, type: 'compra', direction: 'out', date: '2026-01-05T12:00:00.000Z', category: 'entretenim', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-292', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 200000, type: 'deposito', direction: 'in', date: '2026-01-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-292', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 200000, type: 'devolucion', direction: 'in', date: '2026-01-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-293', merchant: "TRANSF. DE FLORENCIA ALMENDRA PIZ", amount: 15190, type: 'deposito', direction: 'in', date: '2026-01-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-294', merchant: "CARGO INTERES LC CTA CTE", amount: 5, type: 'compra', direction: 'out', date: '2026-01-02T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-295', merchant: "IMPUESTO DL 3475", amount: 1, type: 'compra', direction: 'out', date: '2026-01-02T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
@@ -466,15 +467,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       : null;
 
-    const { category, confident, source } = await categorizeTransaction(
-      merchant, amount, type, direction, merchantMemory, apiKeyRef.current
-    );
+    // Reembolsos conocidos: transferencias recibidas que reducen un gasto
+    // (ej. aportes al arriendo de Rencoret/Richasse) en vez de ser ingreso
+    let refundCategory: string | null = null;
+    if (direction === 'in') {
+      const ml = merchant.toLowerCase();
+      for (const [key, cat] of Object.entries(INCOME_REFUND_MAP)) {
+        if (ml.includes(key)) { refundCategory = cat; break; }
+      }
+    }
+    const finalType = refundCategory ? 'devolucion' : type;
+
+    const { category, confident, source } = refundCategory
+      ? { category: refundCategory, confident: true, source: 'local' as const }
+      : await categorizeTransaction(
+          merchant, amount, type, direction, merchantMemory, apiKeyRef.current
+        );
 
     const newTx: Transaction = {
       id:          `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       merchant,
       amount,
-      type,
+      type:        finalType,
       direction,
       date:        date ?? new Date().toISOString(),
       category:    category as any ?? null,

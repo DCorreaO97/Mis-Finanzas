@@ -50,15 +50,18 @@ export function getMonthSummary(
     .filter(t => t.direction === 'in' && t.type !== 'devolucion')
     .reduce((s, t) => s + Math.abs(t.amount), 0);
 
+  // Devoluciones/reembolsos REDUCEN el gasto (no son ingreso):
+  // aportes al arriendo, reembolsos de gastos compartidos, etc.
   const refunds = real
     .filter(t => t.type === 'devolucion')
     .reduce((s, t) => s + Math.abs(t.amount), 0);
 
   const expenses = real
     .filter(t => t.direction === 'out')
-    .reduce((s, t) => s + Math.abs(effectiveAmount(t)), 0);
+    .reduce((s, t) => s + Math.abs(effectiveAmount(t)), 0)
+    - refunds;
 
-  const balance     = income + refunds - expenses;
+  const balance     = income - expenses;
   const savingsRate = income > 0
     ? Math.round((balance / income) * 100)
     : (expenses > 0 ? -100 : 0);
@@ -73,16 +76,21 @@ export function getCategoryTotals(
   month: number
 ): Array<{ id: string; label: string; icon: string; color: string; total: number; count: number }> {
   return CATEGORIES.map(cat => {
-    const catTxs = transactions.filter(t =>
-      t.direction === 'out' &&
-      t.type !== 'pago_interno' &&
+    const inMonth = (t: Transaction) =>
       t.category === cat.id &&
+      t.type !== 'pago_interno' &&
       new Date(t.date).getFullYear() === year &&
-      new Date(t.date).getMonth() === month
-    );
+      new Date(t.date).getMonth() === month;
+
+    const catTxs   = transactions.filter(t => t.direction === 'out' && inMonth(t));
+    // Devoluciones de esta categoría reducen su total (ej: aportes al arriendo)
+    const catRefunds = transactions
+      .filter(t => t.type === 'devolucion' && inMonth(t))
+      .reduce((s, t) => s + Math.abs(t.amount), 0);
+
     return {
       ...cat,
-      total: catTxs.reduce((s, t) => s + Math.abs(effectiveAmount(t)), 0),
+      total: catTxs.reduce((s, t) => s + Math.abs(effectiveAmount(t)), 0) - catRefunds,
       count: catTxs.length,
     };
   }).filter(c => c.total > 0).sort((a, b) => b.total - a.total);
