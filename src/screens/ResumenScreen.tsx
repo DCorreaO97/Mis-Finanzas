@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -7,6 +7,7 @@ import { CATEGORIES } from '../constants/categories';
 import { formatCLP } from '../utils/parseNotification';
 import { getMonthSummary, getCategoryTotals } from '../utils/summary';
 import { detectRecurring, detectMisalignedRefunds } from '../utils/insights';
+import { CategoryDetailModal } from '../components/CategoryDetailModal';
 
 const MONTH_NAMES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -24,6 +25,8 @@ export function ResumenScreen() {
   const month     = now.getMonth();
   const summary   = getMonthSummary(transactions, year, month);
   const catTotals = getCategoryTotals(transactions, year, month);
+
+  const [selectedCat, setSelectedCat] = useState<string | null>(null);
 
   const moveSuggestions = useMemo(
     () => detectMisalignedRefunds(transactions, dismissedMoves),
@@ -151,7 +154,12 @@ export function ResumenScreen() {
                 : budgetPct >= 80  ? '#F57C00'
                 : COLORS.income;
               return (
-                <View key={cat.id} style={styles.catCard}>
+                <TouchableOpacity
+                  key={cat.id}
+                  style={styles.catCard}
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedCat(cat.id)}
+                >
                   <View style={styles.catCardTop}>
                     <View style={styles.catLeft}>
                       <View style={[styles.catIconWrap, { backgroundColor: cat.color + '18' }]}>
@@ -182,7 +190,7 @@ export function ResumenScreen() {
                       },
                     ]} />
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -227,6 +235,15 @@ export function ResumenScreen() {
 
         <View style={{ height: 20 }} />
       </ScrollView>
+
+      {/* Detalle de categoría: movimientos del mes + edición */}
+      <CategoryDetailModal
+        visible={selectedCat !== null}
+        categoryId={selectedCat}
+        year={year}
+        month={month}
+        onClose={() => setSelectedCat(null)}
+      />
     </SafeAreaView>
   );
 }

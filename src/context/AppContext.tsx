@@ -24,6 +24,7 @@ interface AppContextValue {
   categorize:      (txId: string, categoryId: string) => Promise<void>;
   deleteTransaction: (txId: string) => Promise<void>;
   moveTransaction: (txId: string, newYear: number, newMonth: number) => Promise<void>;
+  updateTransaction: (txId: string, changes: { merchant?: string; category?: string }) => Promise<void>;
   setBudget:       (categoryId: string, amount: number) => Promise<void>;
   dismissMoveSuggestion: (txId: string) => Promise<void>;
   clearData:       () => Promise<void>;
@@ -628,6 +629,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  /** Edita nombre de comercio y/o categoría de una transacción existente */
+  const updateTransaction = useCallback(async (
+    txId: string,
+    changes: { merchant?: string; category?: string }
+  ) => {
+    const newMerchant = changes.merchant?.trim();
+    setTransactions(prev => {
+      const updated = prev.map(t => {
+        if (t.id !== txId) return t;
+        return {
+          ...t,
+          merchant: newMerchant || t.merchant,
+          ...(changes.category !== undefined
+            ? { category: changes.category as any, aiConfident: false, aiSource: 'manual' as any }
+            : {}),
+        };
+      });
+      Storage.saveTransactions(updated);
+      return updated;
+    });
+
+    // Si cambió la categoría, recordar el comercio para futuras compras
+    if (changes.category) {
+      const merchantName = newMerchant
+        ?? transactionsRef.current.find(t => t.id === txId)?.merchant
+        ?? '';
+      if (merchantName.trim()) {
+        setMerchantMemory(prev => {
+          const updated: MerchantMemory = {
+            ...prev, [merchantName.trim().toLowerCase()]: changes.category as any,
+          };
+          Storage.saveMerchantMemory(updated);
+          return updated;
+        });
+      }
+    }
+  }, []);
+
   const setBudget = useCallback(async (categoryId: string, amount: number) => {
     setBudgets(prev => {
       const updated = { ...prev };
@@ -680,7 +719,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       transactions, merchantMemory, apiKey, pendingCount, isLoading,
       budgets, dismissedMoves,
       setApiKey, addTransaction, categorize, deleteTransaction, moveTransaction,
-      setBudget, dismissMoveSuggestion, clearData,
+      updateTransaction, setBudget, dismissMoveSuggestion, clearData,
       requestNotificationPermission: requestPermission,
     }}>
       {children}
