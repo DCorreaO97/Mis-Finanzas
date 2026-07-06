@@ -56,14 +56,18 @@ function TabNavigator() {
           headerShown:             false,
           tabBarStyle:             {
             backgroundColor:   COLORS.surface,
-            borderTopColor:    COLORS.border,
-            borderTopWidth:    1,
+            borderTopWidth:    0,
+            elevation:         12,
+            shadowColor:       '#10281A',
+            shadowOffset:      { width: 0, height: -2 },
+            shadowOpacity:     0.06,
+            shadowRadius:      8,
             height:            72,
             paddingBottom:     10,
             paddingTop:        6,
           },
           tabBarActiveTintColor:   COLORS.green,
-          tabBarInactiveTintColor: '#3A3A3A',
+          tabBarInactiveTintColor: '#8A948F',
           tabBarLabelStyle:        { fontSize: 10, fontWeight: '600', marginTop: 1 },
         }}
       >

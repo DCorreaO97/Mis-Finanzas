@@ -296,10 +296,10 @@ export function AjustesScreen() {
 
 const styles = StyleSheet.create({
   safe:             { flex: 1, backgroundColor: COLORS.background },
-  header:           { backgroundColor: COLORS.surface, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  headerTitle:      { color: COLORS.green, fontSize: 24, fontWeight: '800' },
+  header:           { backgroundColor: COLORS.background, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
+  headerTitle:      { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
   scroll:           { flex: 1, backgroundColor: COLORS.background, padding: 16 },
-  section:          { backgroundColor: COLORS.surface, borderRadius: 14, padding: 16, marginBottom: 12, shadowColor: COLORS.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 2 },
+  section:          { backgroundColor: COLORS.surface, borderRadius: 18, padding: 16, marginBottom: 12, shadowColor: COLORS.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 2 },
   sectionTitle:     { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700', marginBottom: 4 },
   sectionDesc:      { color: COLORS.textMuted, fontSize: 12, marginBottom: 12, lineHeight: 18 },
   keyRow:           { flexDirection: 'row', gap: 8, marginBottom: 10 },

@@ -126,15 +126,15 @@ export function HistorialScreen() {
 
 const styles = StyleSheet.create({
   safe:           { flex: 1, backgroundColor: COLORS.background },
-  header:         { backgroundColor: COLORS.surface, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  headerTitle:    { color: COLORS.green, fontSize: 24, fontWeight: '800' },
+  header:         { backgroundColor: COLORS.background, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
+  headerTitle:    { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
   headerSub:      { color: COLORS.textMuted, fontSize: 13, marginTop: 2 },
   scroll:         { flex: 1, backgroundColor: COLORS.background, paddingHorizontal: 16, paddingTop: 14 },
   emptyState:     { flex: 1, backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 32 },
   emptyIcon:      { fontSize: 48 },
   emptyTitle:     { color: COLORS.textPrimary, fontSize: 17, fontWeight: '700' },
   emptySub:       { color: COLORS.textMuted, fontSize: 13, textAlign: 'center' },
-  monthCard:      { backgroundColor: COLORS.surface, borderRadius: 14, marginBottom: 10, shadowColor: COLORS.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 3, overflow: 'hidden' },
+  monthCard:      { backgroundColor: COLORS.surface, borderRadius: 18, marginBottom: 10, shadowColor: COLORS.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 3, overflow: 'hidden' },
   monthHeader:    { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 10 },
   monthDot:       { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
   monthHeaderInfo: { flex: 1 },

@@ -89,7 +89,7 @@ function formatShort(n: number): string {
 }
 
 const styles = StyleSheet.create({
-  card:         { backgroundColor: COLORS.surface, borderRadius: 14, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: COLORS.border },
+  card:         { backgroundColor: COLORS.surface, borderRadius: 18, padding: 16, marginBottom: 14, shadowColor: '#10281A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
   title:        { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700', marginBottom: 14 },
   chartArea:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   monthCol:     { flex: 1, alignItems: 'center' },

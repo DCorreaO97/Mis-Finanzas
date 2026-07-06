@@ -1,32 +1,37 @@
+/**
+ * Paleta Banco Falabella (extraída de la app oficial):
+ * fondo claro gris-verdoso, tarjetas blancas flotantes, números en
+ * casi-negro, verde solo como acento y magenta CMR para alertas.
+ */
 export const COLORS = {
-  // Fondos — tema oscuro (igual que preview GitHub)
-  background:    '#0c160c',   // Fondo muy oscuro verde
-  surface:       '#111e11',   // Cards oscuras
-  surfaceHigh:   '#1a2a1a',   // Cards ligeramente más claras
-  border:        '#1a2e1a',   // Bordes oscuros
+  // Fondos
+  background:    '#EEF3F1',   // Gris-verdoso claro (fondo app banco)
+  surface:       '#FFFFFF',   // Tarjetas blancas
+  surfaceHigh:   '#F5F8F6',   // Tarjetas secundarias
+  border:        '#E6ECE9',   // Bordes casi invisibles
 
   // Verdes Falabella
-  green:         '#00A651',   // Verde primario Falabella
-  greenDark:     '#005a2a',   // Verde oscuro
-  greenMid:      '#008040',   // Verde medio
-  greenLight:    '#4CAF50',   // Verde claro
-  greenFaint:    '#162616',   // Verde muy suave (fondos internos)
+  green:         '#3FA33C',   // Verde acento (barra "Has utilizado")
+  greenDark:     '#2E8231',   // Verde oscuro
+  greenMid:      '#3FA33C',   // Verde medio
+  greenLight:    '#8CCB43',   // Lima de la hoja del logo
+  greenFaint:    '#EAF6E7',   // Verde muy suave (fondos de chips)
 
-  // Texto (tema oscuro)
-  textPrimary:   '#e8e8e8',   // Casi blanco
-  textSecondary: '#c8c8c8',   // Gris claro
-  textMuted:     '#3a5a3a',   // Verde grisáceo oscuro
+  // Texto
+  textPrimary:   '#20262B',   // Casi negro (números grandes del banco)
+  textSecondary: '#5C6670',   // Gris medio (labels de tarjetas)
+  textMuted:     '#98A39E',   // Gris verdoso claro
 
   // Semánticos
-  income:        '#00A651',
-  incomeText:    '#66BB6A',
-  expense:       '#E53935',
-  expenseText:   '#FFCDD2',
-  pending:       '#D84315',
-  pendingText:   '#FFCC80',
-  split:         '#4CAF50',
+  income:        '#3FA33C',
+  incomeText:    '#2E8231',
+  expense:       '#E23B3B',
+  expenseText:   '#C62828',
+  pending:       '#E31C58',   // Magenta CMR (badge "HASTA 40% DCTO")
+  pendingText:   '#C0154A',
+  split:         '#2E8231',
 
-  // Sombras
-  shadow:        'rgba(0,0,0,0.3)',
-  shadowMd:      'rgba(0,0,0,0.5)',
+  // Sombras (suaves — las tarjetas flotan, no se delinean)
+  shadow:        'rgba(16,40,26,0.06)',
+  shadowMd:      'rgba(16,40,26,0.10)',
 };

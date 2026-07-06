@@ -53,12 +53,12 @@ export function ResumenScreen() {
       </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Card balance principal */}
+        {/* Card balance principal — número grande casi-negro, como el banco */}
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Balance del mes</Text>
           <Text style={[
             styles.balanceAmount,
-            { color: summary.balance >= 0 ? COLORS.income : COLORS.expense },
+            summary.balance < 0 && { color: COLORS.expense },
           ]}>
             {summary.balance >= 0 ? '+' : ''}{formatCLP(summary.balance)}
           </Text>
@@ -250,19 +250,19 @@ export function ResumenScreen() {
 
 const styles = StyleSheet.create({
   safe:             { flex: 1, backgroundColor: COLORS.background },
-  header:           { backgroundColor: COLORS.surface, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  headerGreeting:   { color: COLORS.green, fontSize: 24, fontWeight: '800' },
-  headerMonth:      { color: COLORS.textMuted, fontSize: 13, marginTop: 2 },
-  headerBadge:      { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.greenFaint, borderWidth: 1.5, borderColor: COLORS.green + '60', alignItems: 'center', justifyContent: 'center' },
+  header:           { backgroundColor: COLORS.background, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
+  headerGreeting:   { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
+  headerMonth:      { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
+  headerBadge:      { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center', shadowColor: '#10281A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
   headerBadgeText:  { color: COLORS.green, fontSize: 14, fontWeight: '800' },
   scroll:           { flex: 1, backgroundColor: COLORS.background },
-  balanceCard:      { backgroundColor: COLORS.surface, margin: 16, borderRadius: 16, padding: 20, shadowColor: COLORS.shadowMd, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 4 },
-  balanceLabel:     { color: COLORS.textMuted, fontSize: 12, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 },
-  balanceAmount:    { fontSize: 36, fontWeight: '800', marginBottom: 16 },
+  balanceCard:      { backgroundColor: COLORS.surface, margin: 16, borderRadius: 22, padding: 22, shadowColor: '#10281A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.07, shadowRadius: 14, elevation: 4 },
+  balanceLabel:     { color: COLORS.textSecondary, fontSize: 13, fontWeight: '500', marginBottom: 4 },
+  balanceAmount:    { fontSize: 38, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 18, letterSpacing: -0.5 },
   subRow:           { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  subCard:          { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 12, padding: 12, borderWidth: 1 },
-  subCardIncome:    { backgroundColor: COLORS.greenFaint, borderColor: COLORS.green + '40' },
-  subCardExpense:   { backgroundColor: '#FEEBEB', borderColor: COLORS.expense + '40' },
+  subCard:          { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 16, padding: 13, backgroundColor: COLORS.surfaceHigh },
+  subCardIncome:    { },
+  subCardExpense:   { },
   subCardIcon:      { fontSize: 18, color: COLORS.income },
   subCardLabel:     { color: COLORS.textMuted, fontSize: 11, marginBottom: 2 },
   subCardAmount:    { fontSize: 14, fontWeight: '700' },
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
   savingsRate:      { fontSize: 13, fontWeight: '700' },
   savingsBarBg:     { height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: 'hidden' },
   savingsBarFill:   { height: 6, borderRadius: 3 },
-  pendingAlert:     { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, backgroundColor: '#FFF3E0', borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#FFB74D40' },
+  pendingAlert:     { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, backgroundColor: '#FDE8EF', borderRadius: 12, padding: 10 },
   pendingAlertIcon: { fontSize: 16 },
   pendingAlertText: { color: COLORS.pendingText, fontSize: 12, fontWeight: '600', flex: 1 },
   section:          { paddingHorizontal: 16 },
   sectionTitle:     { color: COLORS.textPrimary, fontSize: 16, fontWeight: '700', marginBottom: 10 },
-  catCard:          { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 8, shadowColor: COLORS.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 2 },
+  catCard:          { backgroundColor: COLORS.surface, borderRadius: 18, padding: 15, marginBottom: 8, shadowColor: '#10281A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
   catCardTop:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   catLeft:          { flexDirection: 'row', alignItems: 'center', gap: 10 },
   catIconWrap:      { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   catPct:           { color: COLORS.textMuted, fontSize: 11, marginTop: 1 },
   catBarBg:         { height: 4, backgroundColor: COLORS.border, borderRadius: 2, overflow: 'hidden' },
   catBarFill:       { height: 4, borderRadius: 2 },
-  sugCard:          { flexDirection: 'row', backgroundColor: COLORS.surface, marginHorizontal: 16, marginBottom: 12, borderRadius: 14, padding: 14, gap: 10, borderWidth: 1.5, borderColor: '#F57C0060' },
+  sugCard:          { flexDirection: 'row', backgroundColor: COLORS.surface, marginHorizontal: 16, marginBottom: 12, borderRadius: 18, padding: 15, gap: 10, borderWidth: 1.5, borderColor: COLORS.pending + '40' },
   sugIcon:          { fontSize: 22 },
   sugInfo:          { flex: 1 },
   sugTitle:         { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700', marginBottom: 3 },
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   sugBtnDismissText:{ color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
   recHeader:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   recTotal:         { color: COLORS.green, fontSize: 13, fontWeight: '800' },
-  recRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORS.surface, borderRadius: 12, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: COLORS.border },
+  recRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORS.surface, borderRadius: 16, padding: 13, marginBottom: 6, shadowColor: '#10281A', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 5, elevation: 1 },
   recIconWrap:      { width: 36, height: 36, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   recIcon:          { fontSize: 17 },
   recInfo:          { flex: 1 },

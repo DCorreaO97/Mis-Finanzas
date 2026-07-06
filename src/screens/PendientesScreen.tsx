@@ -67,8 +67,8 @@ export function PendientesScreen() {
 
 const styles = StyleSheet.create({
   safe:         { flex: 1, backgroundColor: COLORS.background },
-  header:       { backgroundColor: COLORS.surface, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  headerTitle:  { color: COLORS.green, fontSize: 24, fontWeight: '800' },
+  header:       { backgroundColor: COLORS.background, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
+  headerTitle:  { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
   headerSub:    { color: COLORS.textMuted, fontSize: 13, marginTop: 2 },
   list:         { backgroundColor: COLORS.background },
   listContent:  { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24 },

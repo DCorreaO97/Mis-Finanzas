@@ -190,8 +190,8 @@ export function CategoryDetailModal({ visible, categoryId, year, month, onClose 
 
 const styles = StyleSheet.create({
   overlay:          { flex: 1, justifyContent: 'flex-end' },
-  backdrop:         { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)' },
-  sheet:            { backgroundColor: COLORS.background, borderTopLeftRadius: 22, borderTopRightRadius: 22, maxHeight: '82%', borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: 16 },
+  backdrop:         { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(16,40,26,0.35)' },
+  sheet:            { backgroundColor: COLORS.background, borderTopLeftRadius: 26, borderTopRightRadius: 26, maxHeight: '82%', paddingHorizontal: 16 },
   handle:           { width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.border, alignSelf: 'center', marginTop: 10, marginBottom: 4 },
   header:           { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   headerIconWrap:   { width: 42, height: 42, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },

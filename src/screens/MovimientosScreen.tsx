@@ -112,8 +112,8 @@ export function MovimientosScreen() {
 
 const styles = StyleSheet.create({
   safe:                { flex: 1, backgroundColor: COLORS.background },
-  header:              { backgroundColor: COLORS.surface, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  headerTitle:         { color: COLORS.green, fontSize: 24, fontWeight: '800' },
+  header:              { backgroundColor: COLORS.background, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
+  headerTitle:         { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
   filterBar:           { backgroundColor: COLORS.surface, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   filterRow:           { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 10 },
   filterChip:          { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: COLORS.surfaceHigh, borderWidth: 1.5, borderColor: COLORS.border },
