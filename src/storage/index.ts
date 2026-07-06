@@ -6,7 +6,12 @@ const KEYS = {
   TRANSACTIONS:    'fb_transactions_v3',
   MERCHANT_MEMORY: 'fb_merchant_memory_v3',
   API_KEY:         'fb_anthropic_api_key',
+  BUDGETS:         'fb_budgets_v1',
+  DISMISSED_MOVES: 'fb_dismissed_moves_v1',
 } as const;
+
+/** Presupuesto mensual por categoría (CLP). Sin entrada = sin presupuesto. */
+export type Budgets = Record<string, number>;
 
 // SecureStore no acepta algunos caracteres en las keys; usar solo [A-Za-z0-9._-]
 const SECURE_API_KEY = 'fb_anthropic_api_key';
@@ -63,6 +68,27 @@ export const Storage = {
     }
   },
 
+  async getBudgets(): Promise<Budgets | null> {
+    const raw = await AsyncStorage.getItem(KEYS.BUDGETS);
+    if (!raw) return null;   // null = nunca configurados (gatilla sugerencia automática)
+    return JSON.parse(raw) as Budgets;
+  },
+
+  async saveBudgets(budgets: Budgets): Promise<void> {
+    await AsyncStorage.setItem(KEYS.BUDGETS, JSON.stringify(budgets));
+  },
+
+  async getDismissedMoves(): Promise<string[]> {
+    const raw = await AsyncStorage.getItem(KEYS.DISMISSED_MOVES);
+    if (!raw) return [];
+    return JSON.parse(raw) as string[];
+  },
+
+  async saveDismissedMoves(ids: string[]): Promise<void> {
+    await AsyncStorage.setItem(KEYS.DISMISSED_MOVES, JSON.stringify(ids));
+  },
+
+  // Nota: presupuestos y sugerencias descartadas sobreviven a "Limpiar datos"
   async clearAll(): Promise<void> {
     await AsyncStorage.multiRemove([
       KEYS.TRANSACTIONS,

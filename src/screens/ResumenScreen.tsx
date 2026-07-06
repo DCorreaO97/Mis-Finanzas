@@ -1,10 +1,12 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { COLORS } from '../constants/colors';
+import { CATEGORIES } from '../constants/categories';
 import { formatCLP } from '../utils/parseNotification';
 import { getMonthSummary, getCategoryTotals } from '../utils/summary';
+import { detectRecurring, detectMisalignedRefunds } from '../utils/insights';
 
 const MONTH_NAMES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -12,13 +14,23 @@ const MONTH_NAMES = [
 ];
 
 export function ResumenScreen() {
-  const { transactions } = useApp();
+  const {
+    transactions, budgets, dismissedMoves,
+    moveTransaction, dismissMoveSuggestion,
+  } = useApp();
 
   const now       = new Date();
   const year      = now.getFullYear();
   const month     = now.getMonth();
   const summary   = getMonthSummary(transactions, year, month);
   const catTotals = getCategoryTotals(transactions, year, month);
+
+  const moveSuggestions = useMemo(
+    () => detectMisalignedRefunds(transactions, dismissedMoves),
+    [transactions, dismissedMoves]
+  );
+  const recurring = useMemo(() => detectRecurring(transactions), [transactions]);
+  const recurringTotal = recurring.reduce((s, r) => s + r.amount, 0);
 
   const savingsColor = summary.savingsRate >= 20 ? COLORS.income
     : summary.savingsRate >= 0 ? COLORS.pending
@@ -95,13 +107,49 @@ export function ResumenScreen() {
           )}
         </View>
 
+        {/* Sugerencias: aportes de arriendo en el mes equivocado */}
+        {moveSuggestions.map(sug => (
+          <View key={sug.tx.id} style={styles.sugCard}>
+            <Text style={styles.sugIcon}>📅</Text>
+            <View style={styles.sugInfo}>
+              <Text style={styles.sugTitle}>Aporte de arriendo desalineado</Text>
+              <Text style={styles.sugText}>
+                {sug.tx.merchant} ({formatCLP(Math.abs(sug.tx.amount))}) llegó a inicios de mes.
+                Probablemente corresponde al arriendo de {sug.targetLabel}.
+              </Text>
+              <View style={styles.sugBtnRow}>
+                <TouchableOpacity
+                  style={styles.sugBtnMove}
+                  onPress={() => moveTransaction(sug.tx.id, sug.targetYear, sug.targetMonth + 1)}
+                >
+                  <Text style={styles.sugBtnMoveText}>Mover a {sug.targetLabel}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.sugBtnDismiss}
+                  onPress={() => dismissMoveSuggestion(sug.tx.id)}
+                >
+                  <Text style={styles.sugBtnDismissText}>Descartar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ))}
+
         {/* Categorías */}
         {catTotals.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Gastos por categoría</Text>
             {catTotals.map(cat => {
-              const pct = summary.income > 0
+              const budget    = budgets[cat.id];
+              const budgetPct = budget && budget > 0
+                ? Math.round((cat.total / budget) * 100) : null;
+              const incomePct = summary.income > 0
                 ? Math.round((cat.total / summary.income) * 100) : 0;
+              // Semáforo: verde < 80%, naranja 80-99%, rojo >= 100%
+              const barColor = budgetPct === null ? cat.color
+                : budgetPct >= 100 ? COLORS.expense
+                : budgetPct >= 80  ? '#F57C00'
+                : COLORS.income;
               return (
                 <View key={cat.id} style={styles.catCard}>
                   <View style={styles.catCardTop}>
@@ -118,13 +166,20 @@ export function ResumenScreen() {
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
                       <Text style={styles.catAmount}>{formatCLP(cat.total)}</Text>
-                      <Text style={styles.catPct}>{pct}% del ingreso</Text>
+                      <Text style={[styles.catPct, budgetPct !== null && budgetPct >= 100 && { color: COLORS.expense }]}>
+                        {budgetPct !== null
+                          ? `${budgetPct}% de ${formatCLP(budget!)}`
+                          : `${incomePct}% del ingreso`}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.catBarBg}>
                     <View style={[
                       styles.catBarFill,
-                      { width: `${Math.min(pct * 2, 100)}%`, backgroundColor: cat.color },
+                      {
+                        width: `${Math.min(budgetPct ?? incomePct * 2, 100)}%`,
+                        backgroundColor: barColor,
+                      },
                     ]} />
                   </View>
                 </View>
@@ -140,6 +195,33 @@ export function ResumenScreen() {
             <Text style={styles.emptySub}>
               Usa el botón + para agregar uno manualmente.
             </Text>
+          </View>
+        )}
+
+        {/* Gastos recurrentes detectados */}
+        {recurring.length > 0 && (
+          <View style={[styles.section, { marginTop: 16 }]}>
+            <View style={styles.recHeader}>
+              <Text style={styles.sectionTitle}>🔁 Gastos recurrentes</Text>
+              <Text style={styles.recTotal}>{formatCLP(recurringTotal)}/mes</Text>
+            </View>
+            {recurring.map(r => {
+              const cat = CATEGORIES.find(c => c.id === r.category);
+              return (
+                <View key={r.merchant} style={styles.recRow}>
+                  <View style={[styles.recIconWrap, { backgroundColor: (cat?.color ?? COLORS.green) + '18' }]}>
+                    <Text style={styles.recIcon}>{cat?.icon ?? '💸'}</Text>
+                  </View>
+                  <View style={styles.recInfo}>
+                    <Text style={styles.recMerchant} numberOfLines={1}>{r.merchant}</Text>
+                    <Text style={styles.recMeta}>
+                      cada ~{r.avgInterval} días · {r.occurrences} cobros
+                    </Text>
+                  </View>
+                  <Text style={styles.recAmount}>{formatCLP(r.amount)}</Text>
+                </View>
+              );
+            })}
           </View>
         )}
 
@@ -189,6 +271,25 @@ const styles = StyleSheet.create({
   catPct:           { color: COLORS.textMuted, fontSize: 11, marginTop: 1 },
   catBarBg:         { height: 4, backgroundColor: COLORS.border, borderRadius: 2, overflow: 'hidden' },
   catBarFill:       { height: 4, borderRadius: 2 },
+  sugCard:          { flexDirection: 'row', backgroundColor: COLORS.surface, marginHorizontal: 16, marginBottom: 12, borderRadius: 14, padding: 14, gap: 10, borderWidth: 1.5, borderColor: '#F57C0060' },
+  sugIcon:          { fontSize: 22 },
+  sugInfo:          { flex: 1 },
+  sugTitle:         { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700', marginBottom: 3 },
+  sugText:          { color: COLORS.textSecondary, fontSize: 12, lineHeight: 17, marginBottom: 10 },
+  sugBtnRow:        { flexDirection: 'row', gap: 8 },
+  sugBtnMove:       { backgroundColor: COLORS.green, borderRadius: 9, paddingVertical: 8, paddingHorizontal: 12 },
+  sugBtnMoveText:   { color: '#fff', fontSize: 12, fontWeight: '700' },
+  sugBtnDismiss:    { backgroundColor: COLORS.surfaceHigh, borderRadius: 9, paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: COLORS.border },
+  sugBtnDismissText:{ color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
+  recHeader:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  recTotal:         { color: COLORS.green, fontSize: 13, fontWeight: '800' },
+  recRow:           { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORS.surface, borderRadius: 12, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: COLORS.border },
+  recIconWrap:      { width: 36, height: 36, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  recIcon:          { fontSize: 17 },
+  recInfo:          { flex: 1 },
+  recMerchant:      { color: COLORS.textPrimary, fontSize: 12, fontWeight: '600' },
+  recMeta:          { color: COLORS.textMuted, fontSize: 10, marginTop: 2 },
+  recAmount:        { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700' },
   emptyState:       { alignItems: 'center', paddingVertical: 60, paddingHorizontal: 32 },
   emptyIcon:        { fontSize: 48, marginBottom: 12 },
   emptyTitle:       { color: COLORS.textPrimary, fontSize: 17, fontWeight: '700', marginBottom: 6 },

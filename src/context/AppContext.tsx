@@ -4,10 +4,11 @@ import React, {
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { Transaction, MerchantMemory } from '../types';
-import { Storage } from '../storage';
+import { Storage, Budgets } from '../storage';
 import { parseNotification } from '../utils/parseNotification';
 import { categorizeTransaction } from '../utils/categorizeWithAI';
-import { INCOME_REFUND_MAP } from '../constants/categories';
+import { INCOME_REFUND_MAP, CATEGORIES } from '../constants/categories';
+import { suggestBudgets, categoryMonthTotal } from '../utils/insights';
 import { useNotificationListener, FalabellaNotification } from '../hooks/useNotificationListener';
 
 interface AppContextValue {
@@ -16,11 +17,15 @@ interface AppContextValue {
   apiKey:          string;
   pendingCount:    number;
   isLoading:       boolean;
+  budgets:         Budgets;
+  dismissedMoves:  string[];
   setApiKey:       (key: string) => Promise<void>;
   addTransaction:  (params: AddTransactionParams) => Promise<void>;
   categorize:      (txId: string, categoryId: string) => Promise<void>;
   deleteTransaction: (txId: string) => Promise<void>;
   moveTransaction: (txId: string, newYear: number, newMonth: number) => Promise<void>;
+  setBudget:       (categoryId: string, amount: number) => Promise<void>;
+  dismissMoveSuggestion: (txId: string) => Promise<void>;
   clearData:       () => Promise<void>;
   requestNotificationPermission: () => void;
 }
@@ -52,7 +57,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-373', merchant: "PAGO SERVIPAG SANTIAGO CHL", amount: 29500, type: 'compra', direction: 'out', date: '2026-07-01T12:00:00.000Z', category: 'transporte', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-374', merchant: "TRANSF. PARA COMUNIDAD EDI", amount: 357072, type: 'compra', direction: 'out', date: '2026-07-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-375', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 565582, type: 'devolucion', direction: 'in', date: '2026-07-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-376', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 656000, type: 'devolucion', direction: 'in', date: '2026-06-30T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-376', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 656000, type: 'devolucion', direction: 'in', date: '2026-07-01T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-377', merchant: "REMUNERACIONES", amount: 3142879, type: 'deposito', direction: 'in', date: '2026-06-26T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-378', merchant: "TRANSF. PARA COMUNIDAD EDI", amount: 190000, type: 'compra', direction: 'out', date: '2026-06-24T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-379', merchant: "TRANSF PARA PAGO TARJETA CMR", amount: -2881170, type: 'pago_interno', direction: 'in', date: '2026-06-22T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -238,7 +243,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-110', merchant: "COMPRA FARMACIA CONDELL", amount: 14990, type: 'compra', direction: 'out', date: '2026-04-04T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-111', merchant: "COMPRA MARTA ELENA FUENZALI", amount: 1900, type: 'compra', direction: 'out', date: '2026-04-04T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-112', merchant: "COMPRA MERCADOPAGO *MARCELAL", amount: 11600, type: 'compra', direction: 'out', date: '2026-04-02T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-113', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 636973, type: 'devolucion', direction: 'in', date: '2026-04-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-113', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 636973, type: 'devolucion', direction: 'in', date: '2026-03-31T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-114', merchant: "TRANSF. DE FRANCISCO JAVIER GARCI", amount: 18000, type: 'deposito', direction: 'in', date: '2026-04-02T12:00:00.000Z', category: 'sueldo', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-115', merchant: "COMPRA FALABELLA.COM", amount: 42970, type: 'compra', direction: 'out', date: '2026-04-01T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-116', merchant: "TRANSF. PARA ROMERO MARTIN", amount: 35000, type: 'compra', direction: 'out', date: '2026-04-01T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
@@ -317,7 +322,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-189', merchant: "COMPRA INVERSIONES SOL CARI", amount: 1300, type: 'compra', direction: 'out', date: '2026-02-28T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-190', merchant: "COMPRA TUU*PLAYA FARO", amount: 2500, type: 'compra', direction: 'out', date: '2026-02-28T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-191', merchant: "COMPRA MERCADOPAGO *SOCIEDAD", amount: 20000, type: 'compra', direction: 'out', date: '2026-02-27T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
-    { id: 'import-192', merchant: "TRANSF. DE BENJAMIN RICHASSE SAN MARTIN", amount: 542817, type: 'devolucion', direction: 'in', date: '2026-02-27T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-192', merchant: "TRANSF. DE BENJAMIN RICHASSE SAN MARTIN", amount: 542817, type: 'devolucion', direction: 'in', date: '2026-03-27T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-193', merchant: "COMPRA OTROSPAGOS COM COND", amount: 338462, type: 'compra', direction: 'out', date: '2026-02-26T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-194', merchant: "COMPRA TOTTUS APP", amount: 25500, type: 'compra', direction: 'out', date: '2026-02-26T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-195', merchant: "PAGO TARJETA CMR", amount: -500000, type: 'pago_interno', direction: 'in', date: '2026-02-26T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -326,7 +331,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-198', merchant: "TRANSF PARA PAGO TARJETA CMR", amount: -500000, type: 'pago_interno', direction: 'in', date: '2026-02-26T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-199', merchant: "TRANSF. PARA BTG PACTUAL", amount: 1500000, type: 'compra', direction: 'out', date: '2026-02-26T12:00:00.000Z', category: 'inversiones', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-200', merchant: "PAGO TARJETA CMR", amount: -1311446, type: 'pago_interno', direction: 'in', date: '2026-02-25T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-201', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 632817, type: 'devolucion', direction: 'in', date: '2026-02-25T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-201', merchant: "TRANSF. DE FRANCISCO JOSE RENCORET MOSQU", amount: 632817, type: 'devolucion', direction: 'in', date: '2026-03-25T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-202', merchant: "COMPRA MERCADOPAGO *FURO", amount: 51084, type: 'compra', direction: 'out', date: '2026-02-24T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-203', merchant: "COMPRA FALABELLA.COM", amount: 25640, type: 'compra', direction: 'out', date: '2026-02-23T12:00:00.000Z', category: 'compras_imp', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-204', merchant: "PAGO TARJETA CMR", amount: -25640, type: 'pago_interno', direction: 'in', date: '2026-02-23T12:00:00.000Z', category: 'pago_interno', aiConfident: true, aiSource: 'income', split: null },
@@ -381,7 +386,7 @@ function buildSampleData(): Transaction[] {
     { id: 'import-253', merchant: "COMPRA FORK NUEVA LAS CONDES", amount: 7336, type: 'compra', direction: 'out', date: '2026-02-02T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-254', merchant: "COMPRA TOTTUS APP", amount: 76075, type: 'compra', direction: 'out', date: '2026-02-02T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-255', merchant: "DEVOLUCION COMPRA TOTTUS APP", amount: -2464, type: 'devolucion', direction: 'in', date: '2026-02-02T12:00:00.000Z', category: 'supermercado', aiConfident: true, aiSource: 'income', split: null },
-    { id: 'import-256', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 546285, type: 'devolucion', direction: 'in', date: '2026-02-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
+    { id: 'import-256', merchant: "TRANSF. DE BENJAMIN RICHASSE", amount: 546285, type: 'devolucion', direction: 'in', date: '2026-03-02T12:00:00.000Z', category: 'departamento', aiConfident: true, aiSource: 'income', split: null },
     { id: 'import-257', merchant: "TRANSF. PARA MAURICIO GOME", amount: 3000, type: 'compra', direction: 'out', date: '2026-02-02T12:00:00.000Z', category: 'otras', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-258', merchant: "COMPRA SUMUP * EL ROQUIN", amount: 2000, type: 'compra', direction: 'out', date: '2026-02-01T12:00:00.000Z', category: 'restaurantes', aiConfident: true, aiSource: 'local', split: null },
     { id: 'import-259', merchant: "COMPRA MASSALUD LICAN", amount: 1950, type: 'compra', direction: 'out', date: '2026-01-30T12:00:00.000Z', category: 'deporte', aiConfident: true, aiSource: 'local', split: null },
@@ -430,9 +435,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [merchantMemory, setMerchantMemory] = useState<MerchantMemory>({});
   const [apiKey,         setApiKeyState]    = useState('');
   const [isLoading,      setIsLoading]      = useState(true);
+  const [budgets,        setBudgets]        = useState<Budgets>({});
+  const [dismissedMoves, setDismissedMoves] = useState<string[]>([]);
 
   const apiKeyRef = useRef(apiKey);
   useEffect(() => { apiKeyRef.current = apiKey; }, [apiKey]);
+
+  // Refs para acceder al estado actual dentro de callbacks estables
+  const transactionsRef = useRef(transactions);
+  useEffect(() => { transactionsRef.current = transactions; }, [transactions]);
+  const budgetsRef = useRef(budgets);
+  useEffect(() => { budgetsRef.current = budgets; }, [budgets]);
 
   // Cargar datos persistidos al inicio; cargar muestra si está vacío
   useEffect(() => {
@@ -440,12 +453,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       Storage.getTransactions(),
       Storage.getMerchantMemory(),
       Storage.getApiKey(),
-    ]).then(([txs, mem, key]) => {
+      Storage.getBudgets(),
+      Storage.getDismissedMoves(),
+    ]).then(([txs, mem, key, savedBudgets, dismissed]) => {
       const initial = txs.length === 0 ? buildSampleData() : txs;
       if (txs.length === 0) Storage.saveTransactions(initial);
       setTransactions(initial);
       setMerchantMemory(mem);
       setApiKeyState(key);
+      setDismissedMoves(dismissed);
+      // Primera vez sin presupuestos → sugerir del promedio histórico
+      if (savedBudgets === null) {
+        const suggested = suggestBudgets(initial);
+        setBudgets(suggested);
+        Storage.saveBudgets(suggested);
+      } else {
+        setBudgets(savedBudgets);
+      }
       setIsLoading(false);
     });
   }, []);
@@ -457,6 +481,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addTransaction = useCallback(async (params: AddTransactionParams) => {
     const { merchant, amount, type, direction, split, rawText, date } = params;
+
+    // Dedupe (solo transacciones de notificaciones): mismo comercio + monto
+    // + dirección dentro de una ventana de 3 minutos → descartar silencioso
+    if (rawText) {
+      const txTime = new Date(date ?? Date.now()).getTime();
+      const ml = merchant.toLowerCase();
+      const isDup = transactionsRef.current.some(t =>
+        t.direction === direction &&
+        t.amount === amount &&
+        t.merchant.toLowerCase() === ml &&
+        Math.abs(new Date(t.date).getTime() - txTime) < 3 * 60 * 1000
+      );
+      if (isDup) return;
+    }
 
     const splitInfo = (split && direction === 'out')
       ? {
@@ -514,6 +552,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
 
     await showLocalConfirmation(merchant, amount, category, newTx.id);
+
+    // Alerta de presupuesto: avisar al cruzar el 80% y el 100%
+    if (direction === 'out' && category) {
+      const budget = budgetsRef.current[category as string];
+      if (budget && budget > 0) {
+        const d = new Date(newTx.date);
+        const before = categoryMonthTotal(
+          transactionsRef.current, category as string, d.getFullYear(), d.getMonth()
+        );
+        const after   = before + Math.abs(amount);
+        const catInfo = CATEGORIES.find(c => c.id === category);
+        const label   = catInfo ? `${catInfo.icon} ${catInfo.label}` : category;
+        if (before < budget && after >= budget) {
+          await showBudgetAlert(
+            '🚨 Presupuesto superado',
+            `${label}: llevas $${after.toLocaleString('es-CL')} de $${budget.toLocaleString('es-CL')} este mes.`
+          );
+        } else if (before < budget * 0.8 && after >= budget * 0.8) {
+          await showBudgetAlert(
+            '⚠️ Cerca del límite',
+            `${label}: llevas ${Math.round((after / budget) * 100)}% del presupuesto ($${after.toLocaleString('es-CL')} de $${budget.toLocaleString('es-CL')}).`
+          );
+        }
+      }
+    }
   }, [merchantMemory]);
 
   const categorize = useCallback(async (txId: string, categoryId: string) => {
@@ -565,6 +628,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const setBudget = useCallback(async (categoryId: string, amount: number) => {
+    setBudgets(prev => {
+      const updated = { ...prev };
+      if (amount > 0) updated[categoryId] = amount;
+      else            delete updated[categoryId];
+      Storage.saveBudgets(updated);
+      return updated;
+    });
+  }, []);
+
+  const dismissMoveSuggestion = useCallback(async (txId: string) => {
+    setDismissedMoves(prev => {
+      const updated = prev.includes(txId) ? prev : [...prev, txId];
+      Storage.saveDismissedMoves(updated);
+      return updated;
+    });
+  }, []);
+
   const clearData = useCallback(async () => {
     // Recargar los datos de muestra inmediatamente (sin esperar reinicio de la app)
     const fresh = buildSampleData();
@@ -597,7 +678,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       transactions, merchantMemory, apiKey, pendingCount, isLoading,
-      setApiKey, addTransaction, categorize, deleteTransaction, moveTransaction, clearData,
+      budgets, dismissedMoves,
+      setApiKey, addTransaction, categorize, deleteTransaction, moveTransaction,
+      setBudget, dismissMoveSuggestion, clearData,
       requestNotificationPermission: requestPermission,
     }}>
       {children}
@@ -609,6 +692,17 @@ export function useApp(): AppContextValue {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp debe usarse dentro de AppProvider');
   return ctx;
+}
+
+async function showBudgetAlert(title: string, body: string): Promise<void> {
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body },
+      trigger: null,
+    });
+  } catch {
+    // No es crítico si falla la notificación local
+  }
 }
 
 async function showLocalConfirmation(

@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { COLORS } from '../constants/colors';
 import { formatCLP } from '../utils/parseNotification';
 import { getAllMonths, getMonthSummary, getCategoryTotals } from '../utils/summary';
+import { TrendChart } from '../components/TrendChart';
 
 export function HistorialScreen() {
   const { transactions } = useApp();
@@ -30,6 +31,7 @@ export function HistorialScreen() {
         </View>
       ) : (
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+          <TrendChart transactions={transactions} />
           {months.map(mk => {
             const key      = `${mk.year}-${mk.month}`;
             const summary  = getMonthSummary(transactions, mk.year, mk.month);

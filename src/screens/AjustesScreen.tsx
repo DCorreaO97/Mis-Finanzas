@@ -13,7 +13,10 @@ import { Storage } from '../storage';
 const { NotificationListener } = NativeModules;
 
 export function AjustesScreen() {
-  const { apiKey, setApiKey, merchantMemory, clearData, requestNotificationPermission } = useApp();
+  const {
+    apiKey, setApiKey, merchantMemory, clearData, requestNotificationPermission,
+    budgets, setBudget,
+  } = useApp();
 
   const [apiKeyInput,    setApiKeyInput]    = useState(apiKey);
   const [showKey,        setShowKey]        = useState(false);
@@ -22,8 +25,24 @@ export function AjustesScreen() {
   const [lastNotifPkg,   setLastNotifPkg]   = useState<string | null>(null);
   const [watchedPkgs,    setWatchedPkgs]    = useState<string[]>([]);
   const [showPkgDebug,   setShowPkgDebug]   = useState(false);
+  const [budgetInputs,   setBudgetInputs]   = useState<Record<string, string>>({});
 
   useEffect(() => { setApiKeyInput(apiKey); }, [apiKey]);
+
+  // Sincronizar inputs de presupuesto con el estado guardado
+  useEffect(() => {
+    const inputs: Record<string, string> = {};
+    Object.entries(budgets).forEach(([catId, amount]) => {
+      inputs[catId] = String(amount);
+    });
+    setBudgetInputs(inputs);
+  }, [budgets]);
+
+  const handleBudgetBlur = (catId: string) => {
+    const raw = (budgetInputs[catId] ?? '').replace(/\D/g, '');
+    const amount = parseInt(raw) || 0;
+    setBudget(catId, amount);
+  };
 
   useEffect(() => {
     if (Platform.OS !== 'android' || !NotificationListener) return;
@@ -201,6 +220,33 @@ export function AjustesScreen() {
           </View>
         )}
 
+        {/* ─── Presupuestos por categoría ───────────── */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🎯 Presupuestos mensuales</Text>
+          <Text style={styles.sectionDesc}>
+            Tope de gasto por categoría. Te avisamos al llegar al 80% y al superarlo.
+            Los valores iniciales son el promedio de tus últimos 6 meses. Deja en 0 para quitar.
+          </Text>
+          {CATEGORIES.filter(c => c.id !== 'pago_interno').map(cat => (
+            <View key={cat.id} style={styles.budgetRow}>
+              <Text style={styles.budgetIcon}>{cat.icon}</Text>
+              <Text style={styles.budgetLabel}>{cat.label}</Text>
+              <View style={styles.budgetInputWrap}>
+                <Text style={styles.budgetCurrency}>$</Text>
+                <TextInput
+                  style={styles.budgetInput}
+                  value={budgetInputs[cat.id] ?? ''}
+                  onChangeText={v => setBudgetInputs(prev => ({ ...prev, [cat.id]: v }))}
+                  onBlur={() => handleBudgetBlur(cat.id)}
+                  placeholder="0"
+                  placeholderTextColor={COLORS.textMuted}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+
         {/* ─── Memoria de comercios ─────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🧠 Comercios recordados</Text>
@@ -286,6 +332,12 @@ const styles = StyleSheet.create({
   iosBanner:        { backgroundColor: '#EEF2FF', borderWidth: 1, borderColor: '#C7D2FE' },
   iosBannerTitle:   { color: '#3730A3', fontSize: 14, fontWeight: '700', marginBottom: 6 },
   iosBannerText:    { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20 },
+  budgetRow:        { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7, borderTopWidth: 1, borderTopColor: COLORS.border },
+  budgetIcon:       { fontSize: 16, width: 24, textAlign: 'center' },
+  budgetLabel:      { flex: 1, color: COLORS.textPrimary, fontSize: 13 },
+  budgetInputWrap:  { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surfaceHigh, borderRadius: 8, borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: 8 },
+  budgetCurrency:   { color: COLORS.textMuted, fontSize: 13, marginRight: 2 },
+  budgetInput:      { width: 84, paddingVertical: 7, color: COLORS.textPrimary, fontSize: 13, textAlign: 'right' },
   memoryRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
   memoryIconWrap:   { width: 36, height: 36, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   memoryIcon:       { fontSize: 18 },
