@@ -26,6 +26,7 @@ export function AjustesScreen() {
   const [watchedPkgs,    setWatchedPkgs]    = useState<string[]>([]);
   const [showPkgDebug,   setShowPkgDebug]   = useState(false);
   const [budgetInputs,   setBudgetInputs]   = useState<Record<string, string>>({});
+  const [motorStats,     setMotorStats]     = useState<{ seen: number; queued: number; last: string } | null>(null);
 
   useEffect(() => { setApiKeyInput(apiKey); }, [apiKey]);
 
@@ -51,6 +52,9 @@ export function AjustesScreen() {
       .catch(() => setNotifGranted(false));
     NotificationListener.getWatchedPackages?.()
       .then((pkgs: string[]) => setWatchedPkgs(pkgs))
+      .catch(() => {});
+    NotificationListener.getDebugStats?.()
+      .then(setMotorStats)
       .catch(() => {});
   }, []);
 
@@ -193,6 +197,19 @@ export function AjustesScreen() {
             </TouchableOpacity>
             {showPkgDebug && (
               <View style={styles.debugBox}>
+                {motorStats && (
+                  <>
+                    <Text style={styles.debugTitle}>Estado del motor de lectura:</Text>
+                    <Text style={styles.debugPkg}>Notificaciones vistas: {motorStats.seen}</Text>
+                    <Text style={styles.debugPkg}>En cola por procesar: {motorStats.queued}</Text>
+                    {motorStats.last ? (
+                      <Text style={styles.debugPkg} numberOfLines={2}>Última: {motorStats.last}</Text>
+                    ) : (
+                      <Text style={styles.debugPkg}>Última: (ninguna aún)</Text>
+                    )}
+                    <View style={{ height: 10 }} />
+                  </>
+                )}
                 <Text style={styles.debugTitle}>Paquetes Android que se escuchan:</Text>
                 {watchedPkgs.map(p => (
                   <Text key={p} style={styles.debugPkg}>{p}</Text>

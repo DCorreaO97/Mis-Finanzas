@@ -8,13 +8,16 @@ import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
 /**
- * Módulo React Native que expone:
+ * Módulo React Native del lector de notificaciones (modelo "pull"):
+ *  - getPendingNotifications() → Promise<Array>  cola persistida, SIN borrar
+ *  - ackNotifications(count)                     confirma N procesadas (las borra)
+ *  - getDebugStats()           → Promise<Map>    {seen, queued, last} para Ajustes
  *  - isPermissionGranted()     → Promise<Boolean>
- *  - openPermissionSettings()  → abre pantalla de acceso a notificaciones
- *  - addListener / removeListeners (requeridos por NativeEventEmitter en RN)
+ *  - openPermissionSettings()                    abre Ajustes del sistema
  *
- * También registra el callback en FalabellaNotificationService para que
- * las notificaciones encoladas (app en background) lleguen al JS al abrir la app.
+ * El evento "onFalabellaNotification" es solo una campanilla: avisa a JS que
+ * hay cola nueva para que haga pull inmediato. Si el evento se pierde, no
+ * importa — el pull al abrir la app / volver a primer plano lo recupera.
  */
 class NotificationListenerModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
@@ -23,10 +26,7 @@ class NotificationListenerModule(reactContext: ReactApplicationContext) :
 
     override fun initialize() {
         super.initialize()
-        // Cuando el módulo se inicializa, registrar el callback y vaciar la cola persistida
-        FalabellaNotificationService.registerCallback(reactApplicationContext) { params ->
-            sendEvent(params)
-        }
+        registerBell()
         // Forzar re-vinculación del listener: tras actualizar la app, Android
         // a veces deja el servicio desconectado hasta un reinicio. Esto lo
         // reconecta (y dispara onListenerConnected → catch-up de notifs).
@@ -40,8 +40,70 @@ class NotificationListenerModule(reactContext: ReactApplicationContext) :
     }
 
     override fun invalidate() {
-        FalabellaNotificationService.unregisterCallback()
+        FalabellaNotificationService.onNewNotification = null
         super.invalidate()
+    }
+
+    /** Campanilla hacia JS cuando el servicio encola algo con la app viva */
+    private fun registerBell() {
+        FalabellaNotificationService.onNewNotification = { emitBell() }
+    }
+
+    private fun emitBell() {
+        try {
+            reactApplicationContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                ?.emit(EVENT_NAME, null)
+        } catch (_: Exception) {
+            // React context caído: el pull al reabrir recupera la cola
+        }
+    }
+
+    /** Cola pendiente completa, sin borrarla (confirmar con ackNotifications) */
+    @ReactMethod
+    fun getPendingNotifications(promise: Promise) {
+        try {
+            val arr = FalabellaNotificationService.peekQueue(reactApplicationContext)
+            val out = Arguments.createArray()
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                out.pushMap(Arguments.createMap().apply {
+                    putString("title",     o.optString("title"))
+                    putString("text",      o.optString("text"))
+                    putString("package",   o.optString("package"))
+                    putDouble("timestamp", o.optDouble("timestamp"))
+                })
+            }
+            promise.resolve(out)
+        } catch (e: Exception) {
+            promise.reject("ERR_QUEUE", e)
+        }
+    }
+
+    /** Confirma que JS procesó las primeras [count] — se eliminan de la cola */
+    @ReactMethod
+    fun ackNotifications(count: Int, promise: Promise) {
+        try {
+            FalabellaNotificationService.ackQueue(reactApplicationContext, count)
+            promise.resolve(true)
+        } catch (e: Exception) {
+            promise.reject("ERR_ACK", e)
+        }
+    }
+
+    /** Estado del motor para la pantalla de Ajustes */
+    @ReactMethod
+    fun getDebugStats(promise: Promise) {
+        try {
+            val (seen, queued, last) = FalabellaNotificationService.getStats(reactApplicationContext)
+            promise.resolve(Arguments.createMap().apply {
+                putInt("seen",   seen)
+                putInt("queued", queued)
+                putString("last", last)
+            })
+        } catch (e: Exception) {
+            promise.reject("ERR_STATS", e)
+        }
     }
 
     /** Verifica si el permiso de acceso a notificaciones está activo */
@@ -82,15 +144,18 @@ class NotificationListenerModule(reactContext: ReactApplicationContext) :
 
     // ── Requeridos por NativeEventEmitter de React Native ──────────────────
     @ReactMethod
-    fun addListener(eventName: String) { /* required */ }
+    fun addListener(eventName: String) {
+        // JS acaba de suscribirse: (re)registrar la campanilla en este contexto
+        // vivo — cierra la carrera donde initialize() corrió antes de tiempo —
+        // y avisar de inmediato si ya hay cola esperando.
+        registerBell()
+        try {
+            if (FalabellaNotificationService.peekQueue(reactApplicationContext).length() > 0) {
+                emitBell()
+            }
+        } catch (_: Exception) { }
+    }
 
     @ReactMethod
     fun removeListeners(count: Int) { /* required */ }
-
-    // ── Helper interno ──────────────────────────────────────────────────────
-    private fun sendEvent(params: WritableMap) {
-        reactApplicationContext
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-            ?.emit(EVENT_NAME, params)
-    }
 }

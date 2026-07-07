@@ -4,28 +4,25 @@ import android.app.Notification
 import android.content.Context
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import com.facebook.react.ReactApplication
-import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.WritableMap
-import com.facebook.react.modules.core.DeviceEventManagerModule
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * NotificationListenerService que captura notificaciones del Banco Falabella
- * y las envía a React Native a través de un evento JS.
+ * NotificationListenerService que captura notificaciones del Banco Falabella.
+ *
+ * Modelo "pull": este servicio SOLO filtra y persiste en una cola en
+ * SharedPreferences. El lado JS pide la cola con getPendingNotifications()
+ * cuando está listo y confirma con ackNotifications(). Así no hay carreras
+ * de entrega: si algo falla, la notificación sigue en disco y se reintenta.
  *
  * Requiere permiso "Acceso a notificaciones" en Ajustes del sistema Android.
- *
- * Confiabilidad:
- *  - Deduplicación: Android puede re-postear la misma notificación (updates,
- *    agrupación); se descartan repetidos por clave pkg|postTime|hash(contenido).
- *  - Persistencia: la cola pendiente se guarda en SharedPreferences para
- *    sobrevivir si Android mata el proceso antes de abrir la app.
  */
 class FalabellaNotificationService : NotificationListenerService() {
 
     companion object {
+        private const val TAG = "FinanzasChuma"
+
         // Paquetes conocidos del Banco Falabella Chile
         // "cl.android" es el package name oficial de la app Banco Falabella Chile en Play Store
         val FALABELLA_PACKAGES: Set<String> = setOf(
@@ -46,80 +43,86 @@ class FalabellaNotificationService : NotificationListenerService() {
             "pago realizado", "banco falabella", "tarjeta cmr", "cmr falabella",
         )
 
-        private const val PREFS_NAME = "falabella_notif_queue"
-        private const val KEY_QUEUE  = "pending"
-        private const val KEY_SEEN   = "seen_keys"
-        private const val MAX_QUEUE  = 50
-        private const val MAX_SEEN   = 100
+        private const val PREFS_NAME     = "falabella_notif_queue"
+        private const val KEY_QUEUE      = "pending"
+        private const val KEY_SEEN       = "seen_keys"
+        private const val KEY_STAT_SEEN  = "stat_seen"    // total que pasó el filtro
+        private const val KEY_LAST       = "last_notif"   // última vista (diagnóstico)
+        private const val MAX_QUEUE      = 100
+        private const val MAX_SEEN       = 200
 
-        private var jsCallback: ((WritableMap) -> Unit)? = null
-
-        /**
-         * Registra el callback de JS. Lo llama NotificationListenerModule al iniciar.
-         * Vacía la cola persistida inmediatamente.
-         */
-        fun registerCallback(context: Context, cb: (WritableMap) -> Unit) {
-            jsCallback = cb
-            drainQueue(context.applicationContext, cb)
-        }
-
-        fun unregisterCallback() {
-            jsCallback = null
-        }
+        /** Campanilla: avisa al módulo (si la app está viva) que hay cola nueva. */
+        @Volatile
+        var onNewNotification: (() -> Unit)? = null
 
         private fun prefs(ctx: Context) =
             ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+        /** Devuelve la cola completa SIN borrarla (JS confirma con ackQueue). */
         @Synchronized
-        private fun drainQueue(ctx: Context, cb: (WritableMap) -> Unit) {
-            val raw = prefs(ctx).getString(KEY_QUEUE, null) ?: return
-            prefs(ctx).edit().remove(KEY_QUEUE).apply()
-            try {
-                val arr = JSONArray(raw)
-                for (i in 0 until arr.length()) {
-                    val o = arr.getJSONObject(i)
-                    val params = Arguments.createMap().apply {
-                        putString("title",     o.optString("title"))
-                        putString("text",      o.optString("text"))
-                        putString("package",   o.optString("package"))
-                        putDouble("timestamp", o.optDouble("timestamp"))
-                    }
-                    cb(params)
-                }
-            } catch (_: Exception) {
-                // JSON corrupto: se descarta la cola
-            }
+        fun peekQueue(ctx: Context): JSONArray {
+            val raw = prefs(ctx).getString(KEY_QUEUE, null) ?: return JSONArray()
+            return try { JSONArray(raw) } catch (_: Exception) { JSONArray() }
+        }
+
+        /** Elimina las primeras [count] notificaciones (ya procesadas por JS). */
+        @Synchronized
+        fun ackQueue(ctx: Context, count: Int) {
+            if (count <= 0) return
+            val arr = peekQueue(ctx)
+            val rest = JSONArray()
+            for (i in count until arr.length()) rest.put(arr.getJSONObject(i))
+            prefs(ctx).edit().putString(KEY_QUEUE, rest.toString()).apply()
+        }
+
+        /** Estadísticas para la pantalla de Ajustes: (vistas, en cola, última). */
+        @Synchronized
+        fun getStats(ctx: Context): Triple<Int, Int, String> {
+            val p = prefs(ctx)
+            return Triple(
+                p.getInt(KEY_STAT_SEEN, 0),
+                peekQueue(ctx).length(),
+                p.getString(KEY_LAST, "") ?: ""
+            )
         }
 
         @Synchronized
-        fun enqueue(ctx: Context, title: String, text: String, pkg: String, timestamp: Long) {
-            try {
-                val raw = prefs(ctx).getString(KEY_QUEUE, null)
-                val arr = if (raw != null) JSONArray(raw) else JSONArray()
-                // Cap: descartar los más antiguos si la cola crece demasiado
-                val trimmed = JSONArray()
-                val start = if (arr.length() >= MAX_QUEUE) arr.length() - MAX_QUEUE + 1 else 0
-                for (i in start until arr.length()) trimmed.put(arr.getJSONObject(i))
-                trimmed.put(JSONObject().apply {
-                    put("title", title)
-                    put("text", text)
-                    put("package", pkg)
-                    put("timestamp", timestamp)
-                })
-                prefs(ctx).edit().putString(KEY_QUEUE, trimmed.toString()).apply()
-            } catch (_: Exception) { }
+        private fun wasSeen(ctx: Context, key: String): Boolean {
+            val raw = prefs(ctx).getString(KEY_SEEN, "") ?: ""
+            return raw.isNotEmpty() && raw.split("\n").contains(key)
         }
 
-        /** true si esta notificación ya fue procesada (dedupe persistente) */
         @Synchronized
-        fun isDuplicate(ctx: Context, key: String): Boolean {
+        private fun markSeen(ctx: Context, key: String) {
             val raw = prefs(ctx).getString(KEY_SEEN, "") ?: ""
             val seen = if (raw.isEmpty()) mutableListOf() else raw.split("\n").toMutableList()
-            if (seen.contains(key)) return true
             seen.add(key)
             while (seen.size > MAX_SEEN) seen.removeAt(0)
             prefs(ctx).edit().putString(KEY_SEEN, seen.joinToString("\n")).apply()
-            return false
+        }
+
+        @Synchronized
+        private fun enqueue(ctx: Context, title: String, text: String, pkg: String, timestamp: Long) {
+            val arr = peekQueue(ctx)
+            val trimmed = JSONArray()
+            val start = if (arr.length() >= MAX_QUEUE) arr.length() - MAX_QUEUE + 1 else 0
+            for (i in start until arr.length()) trimmed.put(arr.getJSONObject(i))
+            trimmed.put(JSONObject().apply {
+                put("title", title)
+                put("text", text)
+                put("package", pkg)
+                put("timestamp", timestamp)
+            })
+            prefs(ctx).edit().putString(KEY_QUEUE, trimmed.toString()).apply()
+        }
+
+        @Synchronized
+        private fun bumpStats(ctx: Context, lastDesc: String) {
+            val p = prefs(ctx)
+            p.edit()
+                .putInt(KEY_STAT_SEEN, p.getInt(KEY_STAT_SEEN, 0) + 1)
+                .putString(KEY_LAST, lastDesc)
+                .apply()
         }
     }
 
@@ -127,7 +130,24 @@ class FalabellaNotificationService : NotificationListenerService() {
         processNotification(sbn)
     }
 
-    /** Pipeline compartido: filtro → dedupe → entrega (directa, emit o cola). */
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        Log.d(TAG, "Listener conectado — catch-up de notificaciones activas")
+        // Catch-up: procesar lo que sigue visible en la barra (recupera compras
+        // llegadas mientras el servicio estaba muerto). El dedupe evita dobles.
+        try {
+            activeNotifications?.forEach { processNotification(it) }
+        } catch (e: Exception) {
+            Log.w(TAG, "Catch-up falló: ${e.message}")
+        }
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        Log.d(TAG, "Listener desconectado")
+    }
+
+    /** Pipeline único: filtrar → dedupe → persistir → avisar a JS. */
     private fun processNotification(sbn: StatusBarNotification?) {
         sbn ?: return
         val extras = sbn.notification?.extras ?: return
@@ -148,70 +168,24 @@ class FalabellaNotificationService : NotificationListenerService() {
 
         if (!isFalabella) return
 
-        // Dedupe: Android re-postea notificaciones (updates, reagrupado) y el
-        // catch-up de onListenerConnected revisa notificaciones ya procesadas.
-        // Clave = paquete + hora de post + hash del contenido.
+        // Dedupe: clave = paquete + hora de post + hash del contenido
         val dedupeKey = "$pkg|${sbn.postTime}|${(title + text).hashCode()}"
-        if (isDuplicate(applicationContext, dedupeKey)) return
-
-        val cb = jsCallback
-        if (cb != null) {
-            // App activa: enviar directo
-            val params = Arguments.createMap().apply {
-                putString("title",     title)
-                putString("text",      text)
-                putString("package",   pkg)
-                putDouble("timestamp", sbn.postTime.toDouble())
-            }
-            cb(params)
-        } else if (tryEmitViaReactContext(title, text, pkg, sbn.postTime)) {
-            // React context vivo aunque el módulo no registró callback: ya se emitió,
-            // NO encolar (evita entrega duplicada)
-        } else {
-            // App cerrada: persistir en disco hasta la próxima apertura
-            enqueue(applicationContext, title, text, pkg, sbn.postTime)
+        if (wasSeen(applicationContext, dedupeKey)) {
+            Log.d(TAG, "Duplicada, ignorada: ${text.take(50)}")
+            return
         }
-    }
 
-    private fun tryEmitViaReactContext(
-        title: String, text: String, pkg: String, timestamp: Long
-    ): Boolean {
-        return try {
-            val app = application as? ReactApplication ?: return false
-            val ctx = app.reactNativeHost.reactInstanceManager.currentReactContext ?: return false
-            val params = Arguments.createMap().apply {
-                putString("title",     title)
-                putString("text",      text)
-                putString("package",   pkg)
-                putDouble("timestamp", timestamp.toDouble())
-            }
-            val emitter = ctx.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                ?: return false
-            emitter.emit(EVENT_NAME, params)
-            true
-        } catch (_: Exception) {
-            false
-        }
-    }
+        // Persistir PRIMERO y marcar como vista DESPUÉS:
+        // si algo falla entre medio, se reintenta en el próximo catch-up
+        enqueue(applicationContext, title, text, pkg, sbn.postTime)
+        markSeen(applicationContext, dedupeKey)
+        bumpStats(applicationContext, "$pkg · ${text.take(60)}")
+        Log.d(TAG, "Encolada: $pkg → ${text.take(60)}")
 
-    override fun onListenerConnected() {
-        super.onListenerConnected()
-        // Catch-up: al (re)conectar, procesar las notificaciones que siguen
-        // visibles en la barra de estado. Recupera compras que llegaron
-        // mientras el servicio estaba muerto (update de la app, Samsung
-        // matando procesos). El dedupe evita registrar dos veces.
-        try {
-            activeNotifications?.forEach { processNotification(it) }
-        } catch (_: Exception) {
-            // getActiveNotifications puede fallar si el servicio aún no está listo
-        }
-    }
-
-    override fun onListenerDisconnected() {
-        super.onListenerDisconnected()
-        // El servicio se desconectó (p.ej. al revocar el permiso)
+        // Campanilla: si la app está abierta, JS hace pull inmediato
+        onNewNotification?.invoke()
     }
 }
 
-/** Nombre del evento JS que escucha useNotificationListener.ts */
+/** Evento JS de "campanilla" — avisa que hay cola nueva; la fuente de verdad es el pull */
 const val EVENT_NAME = "onFalabellaNotification"
