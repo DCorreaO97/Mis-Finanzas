@@ -1,7 +1,9 @@
 package com.falabellafinanzas
 
+import android.content.ComponentName
 import android.content.Intent
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
@@ -24,6 +26,16 @@ class NotificationListenerModule(reactContext: ReactApplicationContext) :
         // Cuando el módulo se inicializa, registrar el callback y vaciar la cola persistida
         FalabellaNotificationService.registerCallback(reactApplicationContext) { params ->
             sendEvent(params)
+        }
+        // Forzar re-vinculación del listener: tras actualizar la app, Android
+        // a veces deja el servicio desconectado hasta un reinicio. Esto lo
+        // reconecta (y dispara onListenerConnected → catch-up de notifs).
+        try {
+            NotificationListenerService.requestRebind(
+                ComponentName(reactApplicationContext, FalabellaNotificationService::class.java)
+            )
+        } catch (_: Exception) {
+            // Sin permiso o API antigua: inofensivo
         }
     }
 

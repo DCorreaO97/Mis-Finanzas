@@ -124,6 +124,11 @@ class FalabellaNotificationService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
+        processNotification(sbn)
+    }
+
+    /** Pipeline compartido: filtro → dedupe → entrega (directa, emit o cola). */
+    private fun processNotification(sbn: StatusBarNotification?) {
         sbn ?: return
         val extras = sbn.notification?.extras ?: return
 
@@ -143,7 +148,8 @@ class FalabellaNotificationService : NotificationListenerService() {
 
         if (!isFalabella) return
 
-        // Dedupe: Android re-postea notificaciones (updates, reagrupado).
+        // Dedupe: Android re-postea notificaciones (updates, reagrupado) y el
+        // catch-up de onListenerConnected revisa notificaciones ya procesadas.
         // Clave = paquete + hora de post + hash del contenido.
         val dedupeKey = "$pkg|${sbn.postTime}|${(title + text).hashCode()}"
         if (isDuplicate(applicationContext, dedupeKey)) return
@@ -190,7 +196,15 @@ class FalabellaNotificationService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        // El servicio se conectó — se pueden cancelar notificaciones activas acá si se requiere
+        // Catch-up: al (re)conectar, procesar las notificaciones que siguen
+        // visibles en la barra de estado. Recupera compras que llegaron
+        // mientras el servicio estaba muerto (update de la app, Samsung
+        // matando procesos). El dedupe evita registrar dos veces.
+        try {
+            activeNotifications?.forEach { processNotification(it) }
+        } catch (_: Exception) {
+            // getActiveNotifications puede fallar si el servicio aún no está listo
+        }
     }
 
     override fun onListenerDisconnected() {

@@ -448,6 +448,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const budgetsRef = useRef(budgets);
   useEffect(() => { budgetsRef.current = budgets; }, [budgets]);
 
+  // Android 13+: pedir permiso para mostrar notificaciones propias
+  // (confirmaciones de gasto y alertas de presupuesto)
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    Notifications.getPermissionsAsync()
+      .then(({ status }) => {
+        if (status !== 'granted') return Notifications.requestPermissionsAsync();
+      })
+      .catch(() => { /* sin permiso: las alertas simplemente no se muestran */ });
+  }, []);
+
   // Cargar datos persistidos al inicio; cargar muestra si está vacío
   useEffect(() => {
     Promise.all([
